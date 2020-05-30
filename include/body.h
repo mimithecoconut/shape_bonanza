@@ -179,6 +179,12 @@ void body_set_mass(body_t *body, double mass);
  */
 void body_set_rotation(body_t *body, double angle);
 
+/*
+* Changes a body's info
+*
+*/
+void body_set_info (body_t *body, void *info);
+
 /**
  * Applies a force to a body over the current tick.
  * If multiple forces are applied in the same tick, they should be added.
@@ -199,6 +205,8 @@ void body_add_force(body_t *body, vector_t force);
  * @param body a pointer to a body returned from body_init()
  * @param impulse the impulse vector to apply
  */
+
+
 void body_add_impulse(body_t *body, vector_t impulse);
 
 /**

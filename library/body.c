@@ -105,6 +105,9 @@ void body_set_rotation(body_t *body, double angle) {
   body->centroid = polygon_centroid(body->shape);
   body->orientation = angle;
 }
+void body_set_info (body_t *body, void *info){
+  body->info = info; 
+}
 
 void body_add_force(body_t *body, vector_t force) {
   body->force = vec_add(body->force, force);
