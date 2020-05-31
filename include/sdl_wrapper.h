@@ -14,6 +14,8 @@
 #define DOWN_ARROW 4
 #define SPACE 5
 
+#define LEFT_BUTTON 6
+
 /**
  * The possible types of key events.
  * Enum types in C are much more primitive than in Java; this is equivalent to:
@@ -36,11 +38,24 @@ typedef enum {
  * @param type the type of key event (KEY_PRESSED or KEY_RELEASED)
  * @param held_time if a press event, the time the key has been held in seconds
  * @param body object to be acted upon by key presses
- * @param scene scene to be acted upon 
+ * @param scene scene to be acted upon
  */
 typedef void (*key_handler_t)(char key, key_event_type_t type, \
   double held_time, void *body, void *scene);
 
+/**
+ * The possible types of mouse events.
+ * Enum types in C are much more primitive than in Java; this is equivalent to:
+ * #define MOUSE_PRESSED 0
+ * #define MOUSE_RELEASED 1
+ */
+typedef enum {
+    MOUSE_PRESSED,
+    MOUSE_RELEASED
+} mouse_event_type_t;
+
+typedef void (*mouse_handler_t)(char key, mouse_event_type_t type, \
+   void *body, void *scene);
 /**
  * Initializes the SDL window and renderer.
  * Must be called once before any of the other SDL functions.
@@ -115,6 +130,15 @@ void sdl_render_scene(scene_t *scene);
  * @param s scene to modify with each key press
  */
 void sdl_on_key(key_handler_t handler, void *b, void *s);
+
+/**
+ * Registers a function to be called every time a mouse button is pressed.
+ * Overwrites any existing handler.
+ * @param handler the function to call with each mouse press
+ * @param b body to modify with each mouse press
+ * @param s scene to modify with each mouse press
+ */
+void sdl_on_mouse(mouse_handler_t handler, void *b, void *s);
 
 /**
  * Gets the amount of time that has passed since the last time

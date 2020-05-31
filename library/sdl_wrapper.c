@@ -31,6 +31,12 @@ SDL_Renderer *renderer;
  * The keypress handler, or NULL if none has been configured.
  */
 key_handler_t key_handler = NULL;
+
+/**
+ * The mouse click handler, or NULL if none has been configured.
+ */
+mouse_handler_t mouse_handler = NULL;
+
 /**
  * SDL's timestamp when a key was last pressed or released.
  * Used to mesasure how long a key has been held.
@@ -135,6 +141,19 @@ bool sdl_is_done() {
             case SDL_QUIT:
                 free(event);
                 return true;
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                if (mouse_handler == NULL) break;
+
+                uint8_t button = event->button.button;
+                char b = 'n';
+                if (button == SDL_BUTTON_LEFT){
+                  b = LEFT_BUTTON;
+                }
+                mouse_event_type_t type1 =
+                    event->type == SDL_MOUSEBUTTONDOWN ? MOUSE_PRESSED : MOUSE_RELEASED;
+                mouse_handler(b, type1, body, scene);
+                break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 // Skip the keypress if no handler is configured
@@ -147,10 +166,10 @@ bool sdl_is_done() {
                 if (!event->key.repeat) {
                     key_start_timestamp = timestamp;
                 }
-                key_event_type_t type =
+                key_event_type_t type2 =
                     event->type == SDL_KEYDOWN ? KEY_PRESSED : KEY_RELEASED;
                 double held_time = (timestamp - key_start_timestamp) / MS_PER_S;
-                key_handler(key, type, held_time, body, scene);
+                key_handler(key, type2, held_time, body, scene);
                 break;
         }
     }
@@ -230,6 +249,12 @@ void sdl_on_key(key_handler_t handler, void *b, void *s) {
     key_handler = handler;
     body = b;
     scene = s;
+}
+
+void sdl_on_mouse(mouse_handler_t handler, void *b, void *s){
+  mouse_handler = handler;
+  body = b;
+  scene = s;
 }
 
 double time_since_last_tick(void) {
