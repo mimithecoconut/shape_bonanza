@@ -14,13 +14,13 @@
 const int INIT_LIST = 5;
 const int WIDTH = 700.0;
 const int HEIGHT = 1000.0;
-const int MASS = 100000000.0;
+const int MASS = 100.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
 const double GRAVITY = 100.0;
 const double FLOOR_THICKNESS = 50.0;
-const double FLOOR_MASS = 1000000.0;
+const double FLOOR_MASS = 10000000000.0;
 /**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
@@ -165,12 +165,8 @@ void *init_pit(scene_t *scene){
   //int rand_index_n = 8 - rand_int(5);
   body_t *shape = init_polygon(3, SIZE_ALL, (vector_t) {100.0, 100.0});
   scene_add_body(scene, shape);
-  create_gravity_one(scene, GRAVITY, shape);
-  //printf("collided\n");
-  if (find_collision(body_get_shape(floor), body_get_shape(shape)).collided){
-    printf("collided\n");
-    create_normal(scene, GRAVITY, shape);
-  }
+  create_gravity_one(scene, GRAVITY, shape, floor);
+  create_physics_collision(scene, 0.0, shape, floor);
 }
 
 /**
@@ -230,11 +226,13 @@ void on_key(char key, key_event_type_t type, double held_time, void* dropped,
  */
 
 void on_mouse(char button, mouse_event_type_t type, void* dropped, void *s){
+    body_t *floor = init_floor(s);
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
             printf("mouse_pressed\n");
-            create_gravity_one(s, GRAVITY, dropped);
+            create_gravity_one(s, GRAVITY, dropped, floor);
+            create_physics_collision(s, 0.0, dropped, floor);
           }
           break;
       case MOUSE_RELEASED:

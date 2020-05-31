@@ -37,12 +37,6 @@ void gravity_creator_one(void *aux){
 }
 
 
-void normal_creator(void *aux) {
-  body_t *bod1 = ((aux_t *) aux)->body1;
-  body_set_force(bod1, (vector_t) {0.0, 0.0}); 
-  // body_add_force(bod1, vec_negate(get_gravity_one(aux)));
-}
-
 void spring_creator(void *aux) {
   vector_t pos1 = body_get_centroid(((aux_t*) aux)->body1);
   vector_t pos2 = body_get_centroid(((aux_t*) aux)->body2);
@@ -70,6 +64,8 @@ void collision_creator(void *aux) {
   collision_info_t info = find_collision((((aux_t*) aux)->body1)->shape, (((aux_t*) aux)->body2)->shape);
   if (info.collided) {
     ((aux_t*) aux)->handler(((aux_t*) aux)->body1, ((aux_t*) aux)->body2, info.axis, ((aux_t*) aux)->aux);
+    //essentially applies normal force by setting force back to 0,0
+    body_set_force(((aux_t *) aux)->body1, VEC_ZERO);
   }
   ((aux_t *) aux)->collided = info.collided;
 }
@@ -95,11 +91,11 @@ void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux)
   ((aux_t *) aux)->collided = !((aux_t *) aux)->collided;
 }
 
-void create_gravity_one(scene_t *scene, double g, body_t *body1){
+void create_gravity_one(scene_t *scene, double g, body_t *body1, body_t *body2){
   aux_t *aux = malloc(sizeof(aux_t));
   aux->constant = g;
   aux->body1 = body1;
-  aux->body2 = NULL;
+  aux->body2 = body2;
   aux->collided = false;
   aux->handler = NULL;
   scene_add_force_creator(scene, (force_creator_t) gravity_creator_one, \
@@ -113,17 +109,6 @@ void create_newtonian_gravity(scene_t *scene, double g, body_t *body1, body_t *b
   aux->collided = false;
   aux->handler = NULL;
   scene_add_force_creator(scene, (force_creator_t) gravity_creator, \
-    aux, free);
-}
-
-void create_normal(scene_t *scene, double g, body_t *body1) {
-  aux_t *aux = malloc(sizeof(aux_t));
-  aux->constant = g;
-  aux->body1 = body1;
-  aux->body2 = NULL;
-  aux->collided = false;
-  aux->handler = NULL;
-  scene_add_force_creator(scene, (force_creator_t) normal_creator, \
     aux, free);
 }
 
