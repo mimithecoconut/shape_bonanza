@@ -14,12 +14,13 @@
 const int INIT_LIST = 5;
 const int WIDTH = 700.0;
 const int HEIGHT = 1000.0;
-const int MASS = 10.0;
+const int MASS = 1200.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
-const double GRAVITY = 20.0;
+const double GRAVITY = 50.0;
 const double FLOOR_THICKNESS = 50.0;
+const double FLOOR_MASS = 1000000.0;
 /**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
@@ -200,23 +201,29 @@ body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
 * @param scene to add floor
 */
 body_t *init_floor(scene_t *scene){
-  body_t *floor = init_rectangle(WIDTH, FLOOR_THICKNESS, \
-  (vector_t) {-WIDTH / 2, -FLOOR_THICKNESS / 2}, 'f');
+  body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
+  (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2}, 'f');
   body_set_color(floor, (rgb_color_t){1, 1, 1});
-  body_set_mass(floor, INFINITY);
+  body_set_mass(floor, FLOOR_MASS);
   scene_add_body(scene, floor);
   return floor;
 }
 
 void on_mouse(char button, mouse_event_type_t type, void* dropped, void *s){
+    body_t *d = dropped;
+    body_t *floor = init_floor(s);
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
-            create_newtonian_gravity(s, GRAVITY, init_floor(s), dropped);
+            printf("mouse_pressed\n");
+            vector_t centroid = body_get_centroid(dropped);
+            body_set_centroid(floor, (vector_t){centroid.x, -FLOOR_THICKNESS / 2});
+            create_newtonian_gravity(s, GRAVITY, d, floor);
           }
           break;
       case MOUSE_RELEASED:
-        reset_dropped(s);
+        printf("mouse_released\n");
+        d = reset_dropped(s);
         break;
     }
 
