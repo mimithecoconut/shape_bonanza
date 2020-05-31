@@ -8,6 +8,7 @@
 
 const double MIN_DIST = 5.0;
 
+
 void gravity_creator(void *aux) {
   body_t *bod1 = ((aux_t *) aux)->body1;
   body_t *bod2 = ((aux_t *) aux)->body2;
@@ -24,6 +25,24 @@ void gravity_creator(void *aux) {
   }
 }
 
+vector_t get_gravity_one(void *aux){
+  body_t *bod1 = ((aux_t *) aux)->body1;
+  double acc = -1 * ((aux_t *) aux)->constant * body_get_mass(bod1);
+  return (vector_t){0, acc};
+}
+
+void gravity_creator_one(void *aux){
+  body_t *bod1 = ((aux_t *) aux)->body1;
+  body_add_force(bod1, get_gravity_one(aux));
+}
+
+
+void normal_creator(void *aux) {
+  body_t *bod1 = ((aux_t *) aux)->body1;
+  body_set_force(bod1, (vector_t) {0.0, 0.0}); 
+  // body_add_force(bod1, vec_negate(get_gravity_one(aux)));
+}
+
 void spring_creator(void *aux) {
   vector_t pos1 = body_get_centroid(((aux_t*) aux)->body1);
   vector_t pos2 = body_get_centroid(((aux_t*) aux)->body2);
@@ -38,6 +57,7 @@ void drag_creator(void *aux) {
     {-1 * vel.x, -1 * vel.y});
   body_add_force(((aux_t*) aux)->body1, force);
 }
+
 
 void collision_handler_1(body_t *body1, body_t *body2, vector_t axis, void *aux){
   if (find_collision(body1->shape, body2->shape).collided){
@@ -75,6 +95,16 @@ void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux)
   ((aux_t *) aux)->collided = !((aux_t *) aux)->collided;
 }
 
+void create_gravity_one(scene_t *scene, double g, body_t *body1){
+  aux_t *aux = malloc(sizeof(aux_t));
+  aux->constant = g;
+  aux->body1 = body1;
+  aux->body2 = NULL;
+  aux->collided = false;
+  aux->handler = NULL;
+  scene_add_force_creator(scene, (force_creator_t) gravity_creator_one, \
+    aux, free);
+}
 void create_newtonian_gravity(scene_t *scene, double g, body_t *body1, body_t *body2) {
   aux_t *aux = malloc(sizeof(aux_t));
   aux->constant = g;
@@ -83,6 +113,17 @@ void create_newtonian_gravity(scene_t *scene, double g, body_t *body1, body_t *b
   aux->collided = false;
   aux->handler = NULL;
   scene_add_force_creator(scene, (force_creator_t) gravity_creator, \
+    aux, free);
+}
+
+void create_normal(scene_t *scene, double g, body_t *body1) {
+  aux_t *aux = malloc(sizeof(aux_t));
+  aux->constant = g;
+  aux->body1 = body1;
+  aux->body2 = NULL;
+  aux->collided = false;
+  aux->handler = NULL;
+  scene_add_force_creator(scene, (force_creator_t) normal_creator, \
     aux, free);
 }
 

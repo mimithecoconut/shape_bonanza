@@ -100,13 +100,17 @@ void body_set_mass(body_t *body, double mass) {
   body->mass = mass;
 }
 
+void body_set_force(body_t *body, vector_t force) {
+  body->force = force;
+}
+
 void body_set_rotation(body_t *body, double angle) {
   polygon_rotate(body->shape, angle - body->orientation, body->centroid);
   body->centroid = polygon_centroid(body->shape);
   body->orientation = angle;
 }
 void body_set_info (body_t *body, void *info){
-  body->info = info; 
+  body->info = info;
 }
 
 void body_add_force(body_t *body, vector_t force) {

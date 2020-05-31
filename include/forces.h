@@ -37,6 +37,14 @@ typedef void (*collision_handler_t)
  */
 void gravity_creator(void *aux);
 
+vector_t get_gravity_one(void *aux);
+
+void gravity_creator_one(void *aux);
+
+
+void normal_creator(void *aux);
+
+
 /**
  * Calculates the spring force on the given objects and applies the force
  * to them
@@ -91,10 +99,11 @@ void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux)
  * @param body2 the second body
  */
 
-
-
 void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2);
 
+void create_gravity_one(scene_t *scene, double g, body_t *body1);
+
+void create_normal(scene_t *scene, double G, body_t *body1);
 /**
  * Adds a force creator to a scene that acts like a spring between two bodies.
  * The force creator will be called each tick

@@ -14,11 +14,11 @@
 const int INIT_LIST = 5;
 const int WIDTH = 700.0;
 const int HEIGHT = 1000.0;
-const int MASS = 1200.0;
+const int MASS = 100000000.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
-const double GRAVITY = 50.0;
+const double GRAVITY = 100.0;
 const double FLOOR_THICKNESS = 50.0;
 const double FLOOR_MASS = 1000000.0;
 /**
@@ -86,6 +86,54 @@ body_t *init_special(double size, vector_t centroid){
   return body_init_with_info(get_coords(str), MASS, \
   (rgb_color_t){0,0,0}, status, free);
 }
+
+/**
+ * Returns a pointer to a body representing a rectangle
+ *
+ * @param width the width of rectangle
+ * @param height the height of rectangle
+ * @param center initial starting position of centroid of rectangle, as a vector
+ * @param s status of body (w for wall, b for block)
+ * @return body_t pointer to rectangle
+ */
+body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
+    list_t *points = list_init(INIT_LIST, (free_func_t) free);
+    vector_t *c1 = malloc(sizeof(vector_t));
+    c1->x = 0;
+    c1->y = 0;
+    list_add(points, c1);
+    vector_t *c2 = malloc(sizeof(vector_t));
+    c2->x = width;
+    c2->y = 0;
+    list_add(points, c2);
+    vector_t *c3 = malloc(sizeof(vector_t));
+    c3->x = width;
+    c3->y = height;
+    list_add(points, c3);
+    vector_t *c4 = malloc(sizeof(vector_t));
+    c4->x = 0;
+    c4->y = height;
+    list_add(points, c4);
+    char *status = malloc(sizeof(char));
+    *status = s;
+    body_t *toReturn = body_init_with_info(points, INFINITY,
+      (rgb_color_t) {1, 0, 0}, status, free);
+    body_set_centroid(toReturn, centroid);
+    return toReturn;
+}
+/**
+* Initializes the floor of the game offscreen and gives it infinite mass
+*
+* @param scene to add floor
+*/
+body_t *init_floor(scene_t *scene){
+  body_t *floor = init_rectangle(WIDTH, FLOOR_THICKNESS, \
+  (vector_t) {WIDTH / 2, FLOOR_THICKNESS / 2}, 'f');
+  body_set_color(floor, (rgb_color_t){0, 1, 1});
+  body_set_mass(floor, FLOOR_MASS);
+  scene_add_body(scene, floor);
+  return floor;
+}
 /**
 * Returns random integer from 0 to upperbound inclusive
 *
@@ -111,10 +159,19 @@ body_t *reset_dropped(scene_t *scene){
   return dropped;
 }
 
-// void *init_pit(scene_t *scene){
-//   int rand_index_n = 8 - rand_int(5);
-//   for
-// }
+void *init_pit(scene_t *scene){
+  body_t *floor = init_floor(scene);
+  //
+  //int rand_index_n = 8 - rand_int(5);
+  body_t *shape = init_polygon(3, SIZE_ALL, (vector_t) {100.0, 100.0});
+  scene_add_body(scene, shape);
+  create_gravity_one(scene, GRAVITY, shape);
+  //printf("collided\n");
+  if (find_collision(body_get_shape(floor), body_get_shape(shape)).collided){
+    printf("collided\n");
+    create_normal(scene, GRAVITY, shape);
+  }
+}
 
 /**
  * Adjusts the velocity of the dropped shape based on keyboard input
@@ -162,72 +219,46 @@ void on_key(char key, key_event_type_t type, double held_time, void* dropped,
 }
 
 /**
- * Returns a pointer to a body representing a rectangle
+ * When left mouse button is pressed, the shape at the top gets dropped
+ * Initilizes new shape to drop
  *
- * @param width the width of rectangle
- * @param height the height of rectangle
- * @param center initial starting position of centroid of rectangle, as a vector
- * @param s status of body (w for wall, b for block)
- * @return body_t pointer to rectangle
+ * @param button representing which key is MOUSE_PRESSED
+ * @param type representing if mouse is MOUSE_PRESSED
+ * @param held_time representing how long key is held
+ * @param dropped representing dropped shape object
+ * @param s representing current scene
  */
-body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
-    list_t *points = list_init(INIT_LIST, (free_func_t) free);
-    vector_t *c1 = malloc(sizeof(vector_t));
-    c1->x = 0;
-    c1->y = 0;
-    list_add(points, c1);
-    vector_t *c2 = malloc(sizeof(vector_t));
-    c2->x = width;
-    c2->y = 0;
-    list_add(points, c2);
-    vector_t *c3 = malloc(sizeof(vector_t));
-    c3->x = width;
-    c3->y = height;
-    list_add(points, c3);
-    vector_t *c4 = malloc(sizeof(vector_t));
-    c4->x = 0;
-    c4->y = height;
-    list_add(points, c4);
-    char *status = malloc(sizeof(char));
-    *status = s;
-    body_t *toReturn = body_init_with_info(points, INFINITY,
-      (rgb_color_t) {1, 0, 0}, status, free);
-    body_set_centroid(toReturn, centroid);
-    return toReturn;
-}
-/**
-* Initializes the floor of the game offscreen and gives it infinite mass
-*
-* @param scene to add floor
-*/
-body_t *init_floor(scene_t *scene){
-  body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
-  (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2}, 'f');
-  body_set_color(floor, (rgb_color_t){1, 1, 1});
-  body_set_mass(floor, FLOOR_MASS);
-  scene_add_body(scene, floor);
-  return floor;
-}
 
 void on_mouse(char button, mouse_event_type_t type, void* dropped, void *s){
-    body_t *d = dropped;
-    body_t *floor = init_floor(s);
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
             printf("mouse_pressed\n");
-            vector_t centroid = body_get_centroid(dropped);
-            body_set_centroid(floor, (vector_t){centroid.x, -FLOOR_THICKNESS / 2});
-            create_newtonian_gravity(s, GRAVITY, d, floor);
+            create_gravity_one(s, GRAVITY, dropped);
           }
           break;
       case MOUSE_RELEASED:
         printf("mouse_released\n");
-        d = reset_dropped(s);
+        dropped = reset_dropped(s);
         break;
     }
-
   }
+
+/**
+ * Prevents shape to be dropped from going offscreen
+ *
+ * @param dropped body representing the shape being dropped
+ */
+void bound(body_t *dropped) {
+    vector_t curr_pos = body_get_centroid(dropped);
+    if (curr_pos.x + SIZE_ALL > WIDTH) {
+        body_set_centroid(dropped, (vector_t) {WIDTH - SIZE_ALL, curr_pos.y});
+    }
+    else if (curr_pos.x - SIZE_ALL < 0) {
+        body_set_centroid(dropped, (vector_t) {SIZE_ALL, curr_pos.y});
+    }
+}
+
 
 
 int main(int argc, char *argv[]) {
@@ -240,11 +271,13 @@ int main(int argc, char *argv[]) {
   sdl_init(min, max);
   scene_t *scene = scene_init();
   body_t *dropped = reset_dropped(scene);
+  init_pit(scene);
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     scene_tick(scene, time_elapsed);
+    bound(dropped);
     sdl_render_scene(scene);
   }
   scene_free(scene);
