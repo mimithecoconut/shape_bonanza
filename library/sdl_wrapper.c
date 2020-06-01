@@ -152,7 +152,7 @@ bool sdl_is_done() {
                 }
                 mouse_event_type_t type1 =
                     event->type == SDL_MOUSEBUTTONDOWN ? MOUSE_PRESSED : MOUSE_RELEASED;
-                mouse_handler(b, type1, body, scene);
+                mouse_handler(b, type1, scene);
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -169,7 +169,7 @@ bool sdl_is_done() {
                 key_event_type_t type2 =
                     event->type == SDL_KEYDOWN ? KEY_PRESSED : KEY_RELEASED;
                 double held_time = (timestamp - key_start_timestamp) / MS_PER_S;
-                key_handler(key, type2, held_time, body, scene);
+                key_handler(key, type2, held_time, scene);
                 break;
         }
     }

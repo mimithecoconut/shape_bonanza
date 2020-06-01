@@ -12,8 +12,8 @@
 #include "star.h"
 
 const int INIT_LIST = 5;
-const int WIDTH = 700.0;
-const int HEIGHT = 1000.0;
+const int WIDTH = 800.0;
+const int HEIGHT = 1010.0;
 const int MASS = 100.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
@@ -69,7 +69,7 @@ body_t *init_polygon(double n, double size, vector_t centroid){
     list_add(points, point);
   }
   char *status = malloc(sizeof(char));
-  *status = 's';
+  *status = 't';
   return body_init_with_info(points, MASS, (rgb_color_t){1,0,0}, status, free);
 }
 
@@ -93,7 +93,7 @@ body_t *init_special(double size, vector_t centroid){
  * @param width the width of rectangle
  * @param height the height of rectangle
  * @param center initial starting position of centroid of rectangle, as a vector
- * @param s status of body (w for wall, b for block)
+ * @param s status of body (f for floor)
  * @return body_t pointer to rectangle
  */
 body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
@@ -127,9 +127,9 @@ body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
 * @param scene to add floor
 */
 body_t *init_floor(scene_t *scene){
-  body_t *floor = init_rectangle(WIDTH, FLOOR_THICKNESS, \
-  (vector_t) {WIDTH / 2, FLOOR_THICKNESS / 2}, 'f');
-  body_set_color(floor, (rgb_color_t){0, 1, 1});
+  body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
+  (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
+  body_set_color(floor, (rgb_color_t){0, 0, 0});
   body_set_mass(floor, FLOOR_MASS);
   scene_add_body(scene, floor);
   return floor;
@@ -151,22 +151,90 @@ body_t *reset_dropped(scene_t *scene){
   list_t *colors = init_colors();
   int rand_index_c = rand_int(6);
   rgb_color_t *color = list_get(colors, rand_index_c);
-  int rand_index_n = 8 - rand_int(5);
+  int rand_index_n = 8 - rand_int(4);
   body_t *dropped = init_polygon(rand_index_n, SIZE_ALL, \
     (vector_t) {WIDTH / 2, HEIGHT - SIZE_ALL});
   body_set_color(dropped, *color);
   scene_add_body(scene, dropped);
   return dropped;
 }
+  /**
+  * Creates physics collision for shapes in scene that are within
+  * 2.5 radius of the body
+  *
+  * @param scene with all the bodies
+  * @param body that we are finding nearby shapes to
+  */
 
-void *init_pit(scene_t *scene){
-  body_t *floor = init_floor(scene);
-  //
-  //int rand_index_n = 8 - rand_int(5);
-  body_t *shape = init_polygon(3, SIZE_ALL, (vector_t) {100.0, 100.0});
-  scene_add_body(scene, shape);
-  create_gravity_one(scene, GRAVITY, shape, floor);
-  create_physics_collision(scene, 0.0, shape, floor);
+void create_nearby_collision(scene_t *scene, body_t *body){
+  double x_coord = body_get_centroid(body).x;
+  double left_bound = x_coord - 2.5 * SIZE_ALL;
+  double right_bound = x_coord + 2.5 * SIZE_ALL;
+  for (size_t i = 0; i < scene_bodies(scene); i++){
+    body_t *other = scene_get_body(scene, i);
+    double x = body_get_centroid(other).x;
+    if (x > left_bound && x < right_bound && \
+      *(char *)body_get_info(other) != 't'){
+      create_physics_collision(scene, 0.0, body, other);
+    }
+  }
+}
+  /**
+  * Initializes one row of shapes in the pit and puts all shapes into scene
+  *
+  * @param the scene to put the row in
+  */
+void *init_one_row(scene_t *scene){
+  char *status = malloc(sizeof(char));
+  *status = 'p';
+  int rand_index_n = 8 - rand_int(4);
+  list_t *colors = init_colors();
+  int rand_index_c = rand_int(6);
+  rgb_color_t *color = list_get(colors, rand_index_c);
+  for (int i = SIZE_ALL; i < WIDTH; i+= 2 * SIZE_ALL){
+    body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
+    body_set_color(shape1, *color);
+    body_set_info(shape1, status);
+    scene_add_body(scene, shape1);
+    rand_index_n = 8 - rand_int(4);
+    rand_index_c = rand_int(6);
+    color = list_get(colors, rand_index_c);
+  }
+}
+  /**
+  * Moves shapes in the pit up by one row
+  *
+  * @param the scene with the shapes
+  */
+void pit_up(scene_t *scene){
+  char *status = malloc(sizeof(char));
+  *status = 'p';
+  for (size_t i = 0; i < scene_bodies(scene); i++){
+    body_t *body = scene_get_body(scene, i);
+    vector_t force = body_get_force(body);
+    if (force.x == 0.0 && force.y == 0.0 && *(char *)body_get_info(body) == 'd'){
+      body_set_info(body, status);
+    }
+    if (*(char *)body_get_info(body) == 'p'){
+      vector_t centroid = body_get_centroid(body);
+      body_set_centroid(body, (vector_t) {centroid.x, centroid.y + 2 *SIZE_ALL});
+    }
+  }
+}
+
+/*
+* Initializes the beginning of the game with 4 rows of shapes in the pit
+*
+* @param scene to put shapes
+*/
+
+void init_pit(scene_t *scene){
+  for (int i = 0; i < 5; i++){
+    init_one_row(scene);
+    if (i != 4){
+      pit_up(scene);
+    }
+  }
 }
 
 /**
@@ -179,18 +247,18 @@ void *init_pit(scene_t *scene){
  * @param s representing current scene
  */
 
-void on_key(char key, key_event_type_t type, double held_time, void* dropped,
-  void *s) {
-    double angle = body_get_orientation(dropped);
+void on_key(char key, key_event_type_t type, double held_time, void *s) {
+    body_t *top = scene_get_top(s);
+    double angle = body_get_orientation(top);
     bool press = false;
     switch (type) {
         case KEY_RELEASED:
             switch (key) {
                 case LEFT_ARROW:
-                    body_set_velocity(dropped, VEC_ZERO);
+                    body_set_velocity(top, VEC_ZERO);
                     break;
                 case RIGHT_ARROW:
-                    body_set_velocity(dropped, VEC_ZERO);
+                    body_set_velocity(top, VEC_ZERO);
                     break;
             }
             break;
@@ -209,7 +277,7 @@ void on_key(char key, key_event_type_t type, double held_time, void* dropped,
             double new_x = DROPPED_V * cos(angle);
             double new_y = DROPPED_V * sin(angle);
             vector_t new_v = {new_x, new_y};
-            body_set_velocity(dropped, new_v);
+            body_set_velocity(top, new_v);
         }
     }
 }
@@ -225,19 +293,22 @@ void on_key(char key, key_event_type_t type, double held_time, void* dropped,
  * @param s representing current scene
  */
 
-void on_mouse(char button, mouse_event_type_t type, void* dropped, void *s){
+void on_mouse(char button, mouse_event_type_t type, void *s){
     body_t *floor = init_floor(s);
+    char *status = malloc(sizeof(char));
+    *status = 'd';
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
-            printf("mouse_pressed\n");
+            body_t *dropped = scene_get_top(s);
             create_gravity_one(s, GRAVITY, dropped, floor);
             create_physics_collision(s, 0.0, dropped, floor);
+            create_nearby_collision(s, dropped);
+            body_set_info(dropped, status);
           }
           break;
       case MOUSE_RELEASED:
-        printf("mouse_released\n");
-        dropped = reset_dropped(s);
+        scene_set_top(s, reset_dropped(s));
         break;
     }
   }
@@ -245,15 +316,16 @@ void on_mouse(char button, mouse_event_type_t type, void* dropped, void *s){
 /**
  * Prevents shape to be dropped from going offscreen
  *
- * @param dropped body representing the shape being dropped
+ * @param scene where the shapes are
  */
-void bound(body_t *dropped) {
-    vector_t curr_pos = body_get_centroid(dropped);
+void bound(scene_t *scene) {
+    body_t *top = scene_get_top(scene);
+    vector_t curr_pos = body_get_centroid(top);
     if (curr_pos.x + SIZE_ALL > WIDTH) {
-        body_set_centroid(dropped, (vector_t) {WIDTH - SIZE_ALL, curr_pos.y});
+        body_set_centroid(top, (vector_t) {WIDTH - SIZE_ALL, curr_pos.y});
     }
     else if (curr_pos.x - SIZE_ALL < 0) {
-        body_set_centroid(dropped, (vector_t) {SIZE_ALL, curr_pos.y});
+        body_set_centroid(top, (vector_t) {SIZE_ALL, curr_pos.y});
     }
 }
 
@@ -268,16 +340,30 @@ int main(int argc, char *argv[]) {
   vector_t max = {WIDTH, HEIGHT};
   sdl_init(min, max);
   scene_t *scene = scene_init();
+  init_floor(scene);
   body_t *dropped = reset_dropped(scene);
+  scene_set_top(scene, dropped);
   init_pit(scene);
+  int row_count = 4;
+  double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
+    total_time_elapsed += time_elapsed;
+    if (total_time_elapsed > 10.0) {
+        total_time_elapsed = 0.0;
+        pit_up(scene);
+        init_one_row(scene);
+        row_count ++;
+    }
     scene_tick(scene, time_elapsed);
-    bound(dropped);
+    // if (row_count > 20){
+    //   init_pit(scene);
+    // }
+    bound(scene);
     sdl_render_scene(scene);
   }
   scene_free(scene);
-
+  return 0;
 }

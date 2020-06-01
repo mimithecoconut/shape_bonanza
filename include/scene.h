@@ -119,6 +119,10 @@ force_t *scene_get_force(scene_t *scene, size_t index);
  * @param scene a pointer to a scene returned from scene_init()
  * @param body a pointer to the body to add to the scene
  */
+body_t *scene_get_top(scene_t *scene);
+
+void scene_set_top(scene_t *scene, body_t *body);
+
 void scene_add_body(scene_t *scene, body_t *body);
 
 /**

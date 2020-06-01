@@ -54,6 +54,8 @@ void force_free(force_t *f) {
 typedef struct scene {
   list_t *bodies;
   list_t *forces;
+  // the shape that is at the top of game
+  body_t *top;
 } scene_t;
 
 scene_t *scene_init(void) {
@@ -61,6 +63,7 @@ scene_t *scene_init(void) {
   assert(toReturn != NULL);
   toReturn->bodies = list_init(NUMBER_BODIES, (free_func_t) body_free);
   toReturn->forces = list_init(1, (free_func_t) force_free);
+  toReturn->top = NULL;
   return toReturn;
 }
 
@@ -80,6 +83,14 @@ body_t *scene_get_body(scene_t *scene, size_t index) {
 
 force_t *scene_get_force(scene_t *scene, size_t index) {
   return (force_t*) list_get(scene->forces, index);
+}
+
+body_t *scene_get_top(scene_t *scene){
+  return scene->top;
+}
+
+void scene_set_top(scene_t *scene, body_t *body){
+  scene->top = body;
 }
 
 void scene_add_body(scene_t *scene, body_t *body) {

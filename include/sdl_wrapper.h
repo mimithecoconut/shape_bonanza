@@ -37,11 +37,10 @@ typedef enum {
  * @param key a character indicating which key was pressed
  * @param type the type of key event (KEY_PRESSED or KEY_RELEASED)
  * @param held_time if a press event, the time the key has been held in seconds
- * @param body object to be acted upon by key presses
  * @param scene scene to be acted upon
  */
 typedef void (*key_handler_t)(char key, key_event_type_t type, \
-  double held_time, void *body, void *scene);
+  double held_time, void *scene);
 
 /**
  * The possible types of mouse events.
@@ -54,8 +53,7 @@ typedef enum {
     MOUSE_RELEASED
 } mouse_event_type_t;
 
-typedef void (*mouse_handler_t)(char key, mouse_event_type_t type, \
-   void *body, void *scene);
+typedef void (*mouse_handler_t)(char key, mouse_event_type_t type, void *scene);
 /**
  * Initializes the SDL window and renderer.
  * Must be called once before any of the other SDL functions.
