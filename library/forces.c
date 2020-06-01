@@ -70,6 +70,8 @@ void collision_creator(void *aux) {
   ((aux_t *) aux)->collided = info.collided;
 }
 
+
+
 void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux){
   double m_a = body_get_mass(body1);
   double m_b = body_get_mass(body2);
@@ -90,6 +92,7 @@ void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux)
   }
   ((aux_t *) aux)->collided = !((aux_t *) aux)->collided;
 }
+
 
 void create_gravity_one(scene_t *scene, double g, body_t *body1, body_t *body2){
   aux_t *aux = malloc(sizeof(aux_t));
@@ -156,6 +159,8 @@ void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2) 
   aux->collided = false;
   create_collision(scene, body1, body2, (collision_handler_t) collision_handler_1, aux, free);
 }
+
+
 
 void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, body_t *body2) {
   aux_t *aux = malloc(sizeof(aux_t));

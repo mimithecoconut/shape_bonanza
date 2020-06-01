@@ -20,7 +20,7 @@ const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
 const double GRAVITY = 100.0;
 const double FLOOR_THICKNESS = 50.0;
-const double FLOOR_MASS = 10000000000.0;
+const double BIG_MASS = 10000000000.0;
 /**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
@@ -130,7 +130,7 @@ body_t *init_floor(scene_t *scene){
   body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
   (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
   body_set_color(floor, (rgb_color_t){0, 0, 0});
-  body_set_mass(floor, FLOOR_MASS);
+  body_set_mass(floor, BIG_MASS);
   scene_add_body(scene, floor);
   return floor;
 }
@@ -160,7 +160,7 @@ body_t *reset_dropped(scene_t *scene){
 }
   /**
   * Creates physics collision for shapes in scene that are within
-  * 2.5 radius of the body
+  * 4 radius of the body
   *
   * @param scene with all the bodies
   * @param body that we are finding nearby shapes to
@@ -168,13 +168,13 @@ body_t *reset_dropped(scene_t *scene){
 
 void create_nearby_collision(scene_t *scene, body_t *body){
   double x_coord = body_get_centroid(body).x;
-  double left_bound = x_coord - 2.5 * SIZE_ALL;
-  double right_bound = x_coord + 2.5 * SIZE_ALL;
+  double left_bound = x_coord - 4 * SIZE_ALL;
+  double right_bound = x_coord + 4 * SIZE_ALL;
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *other = scene_get_body(scene, i);
     double x = body_get_centroid(other).x;
-    if (x > left_bound && x < right_bound && \
-      *(char *)body_get_info(other) != 't'){
+    if (x > left_bound && x < right_bound && *(char *)body_get_info(other) != 't'){
+      body_set_mass(other, BIG_MASS);
       create_physics_collision(scene, 0.0, body, other);
     }
   }
@@ -311,6 +311,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
         scene_set_top(s, reset_dropped(s));
         break;
     }
+    //body_remove(floor);
   }
 
 /**
