@@ -50,7 +50,7 @@ vector_t *edge_perp(vector_t vec) {
 }
 list_t *get_axes1(list_t *shape) {
   size_t len = list_size(shape);
-  list_t *result = list_init(len, free);
+  list_t *result = list_init(len, free, NULL);
   for (size_t i = 0; i < len; i++) {
     vector_t vec = *(vector_t *)(list_get(shape, i % len));
     vec = vec_subtract(vec, *(vector_t *)(list_get(shape, (i + 1) % len)));
@@ -59,7 +59,7 @@ list_t *get_axes1(list_t *shape) {
   return result;
 }
 list_t *get_axes2(list_t *shape1, list_t *shape2) {
-  list_t *result = list_init(list_size(shape1) + list_size(shape2), free);
+  list_t *result = list_init(list_size(shape1) + list_size(shape2), free, NULL);
   list_t *axes1 = get_axes1(shape1);
   list_t *axes2 = get_axes1(shape2);
   for (size_t i = 0; i < list_size(shape1); i++) {

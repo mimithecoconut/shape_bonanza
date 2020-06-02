@@ -144,7 +144,8 @@ void create_collision(scene_t *scene, body_t *body1, body_t *body2, \
     aux_copy->body2 = body2;
     aux_copy->aux = aux;
     aux_copy->handler = handler;
-    list_t *b_list = list_init(2, (free_func_t)body_free);
+    list_t *b_list = list_init(2, (free_func_t)body_free,
+      (equality_func_t) body_equals);
     list_add(b_list, body1);
     list_add(b_list, body2);
     scene_add_bodies_force_creator(scene, (force_creator_t) collision_creator, \

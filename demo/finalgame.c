@@ -122,19 +122,40 @@ body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
     body_set_centroid(toReturn, centroid);
     return toReturn;
 }
+
+// /**
+// * Initializes the floor of the game offscreen and gives it infinite mass
+// *
+// * @param scene to add floor
+// */
+// body_t *init_floor(scene_t *scene){
+//   body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
+//   (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
+//   body_set_color(floor, (rgb_color_t){0, 0, 0});
+//   return floor;
+// }
+
 /**
-* Initializes the floor of the game offscreen and gives it infinite mass
-*
-* @param scene to add floor
-*/
-body_t *init_floor(scene_t *scene){
-  body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
-  (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
-  body_set_color(floor, (rgb_color_t){0, 0, 0});
-  body_set_mass(floor, BIG_MASS);
-  scene_add_body(scene, floor);
-  return floor;
+ * Initializes bodies offscreen representing walls bounding the windows
+ *
+ * @param scene the scene to add blocks to
+ */
+void init_walls(scene_t *scene) {
+    body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS,
+      (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
+    body_t *left_wall = init_rectangle(FLOOR_THICKNESS, HEIGHT,
+      (vector_t) {-FLOOR_THICKNESS / 2, HEIGHT / 2}, 'w');
+    body_t *right_wall = init_rectangle(FLOOR_THICKNESS, HEIGHT,
+      (vector_t) {WIDTH + FLOOR_THICKNESS / 2, HEIGHT / 2}, 'w');
+    body_set_color(left_wall, (rgb_color_t) {1, 1, 1});
+    body_set_color(right_wall, (rgb_color_t) {1, 1, 1});
+    body_set_color(floor, (rgb_color_t) {1, 1, 1});
+    body_set_mass(floor, BIG_MASS);
+    scene_add_body(scene, floor);
+    scene_add_body(scene, left_wall);
+    scene_add_body(scene, right_wall);
 }
+
 /**
 * Returns random integer from 0 to upperbound inclusive
 *
@@ -380,6 +401,8 @@ void init_one_row(scene_t *scene){
     body_set_info(shape1, status);
     create_nearby_collision(scene, shape1);
     create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 0));
+    create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 1));
+    create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 2));
     // create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
     body_set_color(shape1, *color);
     scene_add_body(scene, shape1);
@@ -424,6 +447,8 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
             body_t *dropped = scene_get_top(s);
             create_gravity_one(s, GRAVITY, dropped, floor);
             create_physics_collision(s, 0.0, dropped, floor);
+            create_physics_collision(s, 0.0, dropped, scene_get_body(s, 1));
+            create_physics_collision(s, 0.0, dropped, scene_get_body(s, 2));
             create_nearby_collision(s, dropped);
             if (*(char *)body_get_info(dropped) == 't') {
               body_set_info(dropped, status);
@@ -446,7 +471,7 @@ int main(int argc, char *argv[]) {
   vector_t max = {WIDTH, HEIGHT};
   sdl_init(min, max);
   scene_t *scene = scene_init();
-  init_floor(scene);
+  init_walls(scene);
   body_t *dropped = reset_dropped(scene);
   scene_set_top(scene, dropped);
   init_pit(scene);

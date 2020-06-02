@@ -61,8 +61,9 @@ typedef struct scene {
 scene_t *scene_init(void) {
   scene_t *toReturn = malloc(sizeof(scene_t));
   assert(toReturn != NULL);
-  toReturn->bodies = list_init(NUMBER_BODIES, (free_func_t) body_free);
-  toReturn->forces = list_init(1, (free_func_t) force_free);
+  toReturn->bodies = list_init(NUMBER_BODIES, (free_func_t) body_free,
+    (equality_func_t) body_equals);
+  toReturn->forces = list_init(1, (free_func_t) force_free, NULL);
   toReturn->top = NULL;
   return toReturn;
 }
@@ -109,7 +110,7 @@ void scene_remove_force(scene_t *scene, size_t index) {
 //deprecated
 void scene_add_force_creator(scene_t *scene, force_creator_t forcer, void *aux,
                              free_func_t freer) {
-  scene_add_bodies_force_creator(scene, forcer, aux, list_init(1, freer), freer);
+  scene_add_bodies_force_creator(scene, forcer, aux, list_init(1, freer, NULL), freer);
 
 }
 
