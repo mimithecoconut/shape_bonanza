@@ -9,16 +9,18 @@ typedef struct list {
   size_t size;
   size_t max_size;
   free_func_t freer;
+  equality_func_t eqr;
 } list_t;
 
 
-list_t *list_init(size_t initial_size, free_func_t freer){
+list_t *list_init(size_t initial_size, free_func_t freer, equality_func_t eqr){
   list_t *list = malloc(sizeof(list_t));
   assert(list != NULL);
   list->max_size = initial_size;
   list->size = 0;
   list->lst = malloc(initial_size * sizeof(void *));
   list->freer = freer;
+  list->eqr = eqr;
   assert(list->lst != NULL);
   return list;
 }
@@ -59,4 +61,13 @@ void *list_remove(list_t *list, size_t index) {
   list->lst[list->size - 1] = NULL;
   list->size--;
   return toReturn;
+}
+
+bool list_contains(list_t *list, void *value) {
+  for (size_t i = 0; i < list->size; i++) {
+    if (list->eqr(value, list_get(list, i))) {
+        return true;
+    }
+  }
+  return false;
 }

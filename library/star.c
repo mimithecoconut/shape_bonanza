@@ -6,13 +6,14 @@
 #include <stdlib.h>
 #include "star.h"
 #include <assert.h>
+#include "body.h"
 
 star_t *init_star(vector_t start_pos, int pts, double rad, double vx, double vy) {
     assert(pts > 1 && rad > 0);
     star_t *toReturn = malloc(sizeof(star_t));
     toReturn->points = pts;
     toReturn->radius = rad;
-    toReturn->coords = list_init(pts * 2, free);
+    toReturn->coords = list_init(pts * 2, free, NULL);
     // Initializes star vertices
     for (int k = 0; k < pts * 2; k++) {
         double factor = M_PI / pts;
@@ -54,7 +55,14 @@ int get_num_pts(star_t *star) {
 }
 
 list_t *get_coords(star_t *star) {
-    return star->coords;
+    list_t *copy = list_init(list_size(star->coords), free,
+      (equality_func_t) body_equals);
+    for (size_t i = 0; i < list_size(star->coords); i++) {
+        vector_t *vec_copy = malloc(sizeof(vector_t));
+        *vec_copy = *(vector_t *)(list_get(star->coords, i));
+        list_add(copy, vec_copy);
+    }
+    return copy;
 }
 
 double get_radius(star_t *star) {

@@ -40,7 +40,8 @@ void body_free(body_t *body){
 }
 
 list_t *body_get_shape(body_t *body) {
-  list_t *copy = list_init(list_size(body->shape), free);
+  list_t *copy = list_init(list_size(body->shape), free,
+    (equality_func_t) body_equals);
   for (size_t i = 0; i < list_size(body->shape); i++) {
     vector_t *vec_copy = malloc(sizeof(vector_t));
     *vec_copy = *(vector_t *)(list_get(body->shape, i));
@@ -102,6 +103,23 @@ void body_set_mass(body_t *body, double mass) {
 
 void body_set_force(body_t *body, vector_t force) {
   body->force = force;
+}
+
+bool body_equals(body_t *body1, body_t *body2) {
+    rgb_color_t c1 = body_get_color(body1);
+    rgb_color_t c2 = body_get_color(body2);
+    if (body1->mass != body2->mass || !(c1.r == c2.r && c1.g == c2.g && c1.b ==
+      c2.b) || list_size(body1->shape) != list_size(body2->shape)) {
+        return false;
+    }
+    for (size_t j = 0; j < list_size(body1->shape); j++) {
+        vector_t v1 = *(vector_t *)list_get(body1->shape, j);
+        vector_t v2 = *(vector_t *)list_get(body2->shape, j);
+        if (v1.x != v2.x || v1.y != v2.y) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void body_set_rotation(body_t *body, double angle) {

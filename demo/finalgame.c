@@ -18,7 +18,7 @@ const int MASS = 100.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
-const double GRAVITY = 100.0;
+const double GRAVITY = 150.0;
 const double FLOOR_THICKNESS = 50.0;
 const double BIG_MASS = 10000000000.0;
 /**
@@ -27,7 +27,7 @@ const double BIG_MASS = 10000000000.0;
  * @return list_t of colors for shape
  */
 list_t *init_colors(){
-  list_t *ans = list_init(INIT_LIST, free);
+  list_t *ans = list_init(INIT_LIST, free, NULL);
   rgb_color_t *red = malloc(sizeof(rgb_color_t));
   red->r = 1, red->g = 0, red->b = 0;
   rgb_color_t *orange = malloc(sizeof(rgb_color_t));
@@ -60,7 +60,7 @@ list_t *init_colors(){
 * @param centroid
 */
 body_t *init_polygon(double n, double size, vector_t centroid){
-  list_t *points = list_init(n, (free_func_t) free);
+  list_t *points = list_init(n, (free_func_t) free, NULL);
   double angle = 2 * M_PI / n;
   for (int i = 0; i < n; i ++){
     vector_t *point = malloc(sizeof(vector_t));
@@ -83,8 +83,9 @@ body_t *init_special(double size, vector_t centroid){
   star_t *str = init_star(centroid, PTS, size, 0.0, 0.0);
   char *status = malloc(sizeof(char));
   *status = 'b';
-  return body_init_with_info(get_coords(str), MASS, \
-  (rgb_color_t){0,0,0}, status, free);
+  list_t *coords = get_coords(str);
+  star_free(str);
+  return body_init_with_info(coords, MASS, (rgb_color_t){0,0,0}, status, free);
 }
 
 /**
@@ -97,7 +98,7 @@ body_t *init_special(double size, vector_t centroid){
  * @return body_t pointer to rectangle
  */
 body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
-    list_t *points = list_init(INIT_LIST, (free_func_t) free);
+    list_t *points = list_init(INIT_LIST, (free_func_t) free, NULL);
     vector_t *c1 = malloc(sizeof(vector_t));
     c1->x = 0;
     c1->y = 0;
@@ -142,6 +143,7 @@ body_t *init_floor(scene_t *scene){
 int rand_int(int upper){
   return (int) floor((upper + 1) *((float)rand()/ (float)RAND_MAX));
 }
+
 /**
 * Resets the dropped shape at the top with random color and n
 *
@@ -151,55 +153,19 @@ body_t *reset_dropped(scene_t *scene){
   list_t *colors = init_colors();
   int rand_index_c = rand_int(6);
   rgb_color_t *color = list_get(colors, rand_index_c);
-  int rand_index_n = 8 - rand_int(4);
-  body_t *dropped = init_polygon(rand_index_n, SIZE_ALL, \
-    (vector_t) {WIDTH / 2, HEIGHT - SIZE_ALL});
-  body_set_color(dropped, *color);
+  int rand_index_n = 9 - rand_int(5);
+  body_t *dropped;
+  if (rand_index_n == 9) {
+      dropped = init_special(SIZE_ALL, \
+        (vector_t) {WIDTH / 2, HEIGHT - SIZE_ALL});
+  }
+  else {
+      dropped = init_polygon(rand_index_n, SIZE_ALL, \
+        (vector_t) {WIDTH / 2, HEIGHT - SIZE_ALL});
+      body_set_color(dropped, *color);
+  }
   scene_add_body(scene, dropped);
   return dropped;
-}
-  /**
-  * Creates physics collision for shapes in scene that are within
-  * 4 radius of the body
-  *
-  * @param scene with all the bodies
-  * @param body that we are finding nearby shapes to
-  */
-
-void create_nearby_collision(scene_t *scene, body_t *body){
-  double x_coord = body_get_centroid(body).x;
-  double left_bound = x_coord - 4 * SIZE_ALL;
-  double right_bound = x_coord + 4 * SIZE_ALL;
-  for (size_t i = 0; i < scene_bodies(scene); i++){
-    body_t *other = scene_get_body(scene, i);
-    double x = body_get_centroid(other).x;
-    if (x > left_bound && x < right_bound && *(char *)body_get_info(other) != 't'){
-      body_set_mass(other, BIG_MASS);
-      create_physics_collision(scene, 0.0, body, other);
-    }
-  }
-}
-  /**
-  * Initializes one row of shapes in the pit and puts all shapes into scene
-  *
-  * @param the scene to put the row in
-  */
-void *init_one_row(scene_t *scene){
-  char *status = malloc(sizeof(char));
-  *status = 'p';
-  int rand_index_n = 8 - rand_int(4);
-  list_t *colors = init_colors();
-  int rand_index_c = rand_int(6);
-  rgb_color_t *color = list_get(colors, rand_index_c);
-  for (int i = SIZE_ALL; i < WIDTH; i+= 2 * SIZE_ALL){
-    body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
-    body_set_color(shape1, *color);
-    body_set_info(shape1, status);
-    scene_add_body(scene, shape1);
-    rand_index_n = 8 - rand_int(4);
-    rand_index_c = rand_int(6);
-    color = list_get(colors, rand_index_c);
-  }
 }
   /**
   * Moves shapes in the pit up by one row
@@ -218,21 +184,6 @@ void pit_up(scene_t *scene){
     if (*(char *)body_get_info(body) == 'p'){
       vector_t centroid = body_get_centroid(body);
       body_set_centroid(body, (vector_t) {centroid.x, centroid.y + 2 *SIZE_ALL});
-    }
-  }
-}
-
-/*
-* Initializes the beginning of the game with 4 rows of shapes in the pit
-*
-* @param scene to put shapes
-*/
-
-void init_pit(scene_t *scene){
-  for (int i = 0; i < 5; i++){
-    init_one_row(scene);
-    if (i != 4){
-      pit_up(scene);
     }
   }
 }
@@ -283,38 +234,6 @@ void on_key(char key, key_event_type_t type, double held_time, void *s) {
 }
 
 /**
- * When left mouse button is pressed, the shape at the top gets dropped
- * Initilizes new shape to drop
- *
- * @param button representing which key is MOUSE_PRESSED
- * @param type representing if mouse is MOUSE_PRESSED
- * @param held_time representing how long key is held
- * @param dropped representing dropped shape object
- * @param s representing current scene
- */
-
-void on_mouse(char button, mouse_event_type_t type, void *s){
-    body_t *floor = init_floor(s);
-    char *status = malloc(sizeof(char));
-    *status = 'd';
-    switch(type){
-      case MOUSE_PRESSED:
-          if (button == LEFT_BUTTON){
-            body_t *dropped = scene_get_top(s);
-            create_gravity_one(s, GRAVITY, dropped, floor);
-            create_physics_collision(s, 0.0, dropped, floor);
-            create_nearby_collision(s, dropped);
-            body_set_info(dropped, status);
-          }
-          break;
-      case MOUSE_RELEASED:
-        scene_set_top(s, reset_dropped(s));
-        break;
-    }
-    //body_remove(floor);
-  }
-
-/**
  * Prevents shape to be dropped from going offscreen
  *
  * @param scene where the shapes are
@@ -330,7 +249,193 @@ void bound(scene_t *scene) {
     }
 }
 
+/**
+ * Removes all objects in a certain radius around a certain body, including
+ * the body itself
+ *
+ * @param b body to remove bodies around
+ * @param s scene to remove bodies from
+ */
+void remove_nearby(body_t *b, scene_t *s) {
+    double x_coord = body_get_centroid(b).x;
+    double y_coord = body_get_centroid(b).y;
+    double left_bound = x_coord - 4 * SIZE_ALL;
+    double right_bound = x_coord + 4 * SIZE_ALL;
+    double lower_bound = y_coord - 4 * SIZE_ALL;
+    double upper_bound = y_coord + 4 * SIZE_ALL;
+    for (size_t i = 0; i < scene_bodies(s); i++){
+        body_t *other = scene_get_body(s, i);
+        double x = body_get_centroid(other).x;
+        double y = body_get_centroid(other).y;
+        if (x > left_bound && x < right_bound && y > lower_bound &&
+          y < upper_bound && *(char *)body_get_info(other) == 'p'){
+            body_remove(other);
+        }
+    }
+    body_remove(b);
+}
 
+/**
+ * Helper function to count how many objects of the same color as the current
+ * object are touching
+ *
+ * @param b body to check
+ * @param s scene containing the bodies
+ * @param count current number
+ * @param l list of bodies of the same color touching
+ * @return number of objects touching b with the same color as b
+ */
+int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
+    for (size_t i = 0; i < scene_bodies(s); i++){
+        body_t *body = scene_get_body(s, i);
+        rgb_color_t c1 = body_get_color(b);
+        rgb_color_t c2 = body_get_color(body);
+        if (!body_equals(body, b) &&
+          find_collision(b->shape, body->shape).collided &&
+          c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
+            if (!list_contains(l, body)) {
+                list_add(l, body);
+                return count_colors(body, s, list_size(l), l);
+            }
+        }
+    }
+    return count;
+}
+
+/**
+ * Checks whether the current object is touching at least 3 other objects of
+ * the same color, and if so, removes them
+ *
+ * @param b body to check
+ * @param s scene containing the bodies
+ */
+void touching_colors(body_t *b, scene_t *s) {
+    list_t *touching = list_init(INIT_LIST, (free_func_t) body_free,
+      (equality_func_t) body_equals);
+    list_add(touching, b);
+    if (count_colors(b, s, list_size(touching), touching) >= 3) {
+        for (size_t i = 0; i < list_size(touching); i++) {
+            body_remove(list_get(touching, i));
+        }
+    }
+    free(touching);
+}
+
+/**
+ * Collision handler to destroy objects if at least 3 of one color are touching
+ *
+ * @param body_1 first body to check
+ * @param body_2 second body to check
+ * @param axis axis of collision
+ * @param aux auxiliary value
+ */
+void destroy(body_t *body_1, body_t *body_2, vector_t axis, void *aux) {
+    if (*(char*)body_get_info(body_1) == 'b') {
+        remove_nearby(body_1, (scene_t*) aux);
+    }
+    else if (*(char*)body_get_info(body_1) != 'f') {
+        touching_colors(body_1, (scene_t*) aux);
+    }
+}
+
+/**
+* Creates physics collision for shapes in scene that are within
+* 4 radius of the body
+*
+* @param scene with all the bodies
+* @param body that we are finding nearby shapes to
+*/
+void create_nearby_collision(scene_t *scene, body_t *body){
+  double x_coord = body_get_centroid(body).x;
+  double left_bound = x_coord - 4 * SIZE_ALL;
+  double right_bound = x_coord + 4 * SIZE_ALL;
+  for (size_t i = 0; i < scene_bodies(scene); i++){
+    body_t *other = scene_get_body(scene, i);
+    double x = body_get_centroid(other).x;
+    if (x > left_bound && x < right_bound && *(char *)body_get_info(other) != 't'
+      && *(char *)body_get_info(other) != 'b'){
+      body_set_mass(other, BIG_MASS);
+      create_physics_collision(scene, 0.0, body, other);
+    }
+    if (*(char *)body_get_info(body) != 'p' && x > left_bound && x < right_bound && *(char *)body_get_info(other) == 'p'){
+      create_collision(scene, body, other, destroy, scene, (free_func_t)body_free);
+    }
+  }
+}
+
+/**
+* Initializes one row of shapes in the pit and puts all shapes into scene
+*
+* @param the scene to put the row in
+*/
+void init_one_row(scene_t *scene){
+  char *status = malloc(sizeof(char));
+  *status = 'p';
+  int rand_index_n = 8 - rand_int(4);
+  list_t *colors = init_colors();
+  int rand_index_c = rand_int(6);
+  rgb_color_t *color = list_get(colors, rand_index_c);
+  for (int i = SIZE_ALL; i < WIDTH; i+= 2 * SIZE_ALL){
+    body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
+    body_set_info(shape1, status);
+    create_nearby_collision(scene, shape1);
+    create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 0));
+    // create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
+    body_set_color(shape1, *color);
+    scene_add_body(scene, shape1);
+    rand_index_n = 8 - rand_int(4);
+    rand_index_c = rand_int(6);
+    color = list_get(colors, rand_index_c);
+  }
+}
+
+/*
+* Initializes the beginning of the game with 4 rows of shapes in the pit
+*
+* @param scene to put shapes
+*/
+
+void init_pit(scene_t *scene){
+  for (int i = 0; i < 5; i++){
+    init_one_row(scene);
+    if (i != 4){
+      pit_up(scene);
+    }
+  }
+}
+
+/**
+ * When left mouse button is pressed, the shape at the top gets dropped
+ * Initilizes new shape to drop
+ *
+ * @param button representing which key is MOUSE_PRESSED
+ * @param type representing if mouse is MOUSE_PRESSED
+ * @param held_time representing how long key is held
+ * @param dropped representing dropped shape object
+ * @param s representing current scene
+ */
+void on_mouse(char button, mouse_event_type_t type, void *s){
+    body_t *floor = scene_get_body(s, 0);
+    char *status = malloc(sizeof(char));
+    *status = 'd';
+    switch(type){
+      case MOUSE_PRESSED:
+          if (button == LEFT_BUTTON){
+            body_t *dropped = scene_get_top(s);
+            create_gravity_one(s, GRAVITY, dropped, floor);
+            create_physics_collision(s, 0.0, dropped, floor);
+            create_nearby_collision(s, dropped);
+            if (*(char *)body_get_info(dropped) == 't') {
+              body_set_info(dropped, status);
+            }
+          }
+          break;
+      case MOUSE_RELEASED:
+        scene_set_top(s, reset_dropped(s));
+        break;
+    }
+    //body_remove(floor);
+}
 
 int main(int argc, char *argv[]) {
   if (argc != 1) {

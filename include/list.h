@@ -2,6 +2,7 @@
 #define __LIST_H__
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /**
  * A growable array of pointers.
@@ -17,6 +18,11 @@ typedef struct list list_t;
 typedef void (*free_func_t)(void *);
 
 /**
+ * A function that can be called on list elements to check equality.
+ */
+typedef bool (*equality_func_t)(void *, void *);
+
+/**
  * Allocates memory for a new list with space for the given number of elements.
  * The list is initially empty.
  * Asserts that the required memory was allocated.
@@ -26,7 +32,7 @@ typedef void (*free_func_t)(void *);
  *   in list_free() when they are no longer in use
  * @return a pointer to the newly allocated list
  */
-list_t *list_init(size_t initial_size, free_func_t freer);
+list_t *list_init(size_t initial_size, free_func_t freer, equality_func_t eqr);
 
 /**
  * Releases the memory allocated for a list.
@@ -74,5 +80,13 @@ void *list_remove(list_t *list, size_t index);
  * @param value the element to add to the end of the list
  */
 void list_add(list_t *list, void *value);
+
+/**
+ * Checks if the value is already in the list
+ *
+ * @param list a pointer to a list returned from list_init()
+ * @param value the element to check
+ */
+bool list_contains(list_t *list, void *value);
 
 #endif // #ifndef __LIST_H__

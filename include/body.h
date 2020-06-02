@@ -182,10 +182,27 @@ void body_set_rotation(body_t *body, double angle);
 /*
 * Changes a body's info
 *
+* @param body a pointer to a body returned from body_init()
+* @param info info to set to the body
 */
 void body_set_info (body_t *body, void *info);
 
+/**
+ * Sets the force of the body to the given value
+ *
+ * @param body a pointer to a body returned from body_init()
+ * @param force force to apply to the body
+ */
 void body_set_force(body_t *body, vector_t force);
+
+/**
+ * Checks whether the two bodies are equal
+ *
+ * @param body_1 first body to compare
+ * @param body_2 second body to compare
+ * @return true if the bodies are equal, false otherwise
+ */
+bool body_equals(body_t *body_1, body_t *body_2);
 
 /**
  * Applies a force to a body over the current tick.
