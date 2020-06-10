@@ -13,12 +13,12 @@ LIB_MATH = -lm
 # Compiler flags that link the program with the math and SDL libraries.
 # Note that $(...) substitutes a variable's value, so this line is equivalent to
 # LIBS = -lm -lSDL2 -lSDL2_gfx
-LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx
+LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx -lSDL2_ttf -lSDL2_image
 
 # List of demo programs
-DEMOS = finalgame
+DEMOS = finalgame test
 # List of C files in "libraries" that we provide
-STAFF_LIBS = test_util sdl_wrapper
+STAFF_LIBS = test_util sdl_wrapper SDL_ttf
 # List of C files in "libraries" that you will write
 STUDENT_LIBS = vector list \
 	color body scene \

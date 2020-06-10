@@ -4,6 +4,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/begin_code.h>
 #include "sdl_wrapper.h"
 
 const char WINDOW_TITLE[] = "CS 3";
