@@ -152,6 +152,15 @@ void load_bmusic(){
       Mix_PlayMusic( gMusic, -1 );
   }
 }
+
+void load_soundeffect(){
+  Mix_Chunk *bloop = NULL;
+  bloop = Mix_LoadWAV("/home/cs3/cs3/shape_bonanza/bloop_x.wav");
+  if (bloop == NULL){
+     printf ("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
+  }
+  Mix_PlayChannel(-1, bloop, 0);
+}
 //
 // void close_audio(Mix_Music *gMusic){
 //
@@ -209,6 +218,7 @@ bool sdl_is_done() {
                 mouse_event_type_t type1 =
                     event->type == SDL_MOUSEBUTTONDOWN ? MOUSE_PRESSED : MOUSE_RELEASED;
                 mouse_handler(b, type1, scene);
+                load_soundeffect();
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
