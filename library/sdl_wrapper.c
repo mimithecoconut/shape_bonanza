@@ -29,6 +29,18 @@ SDL_Window *window;
  */
 SDL_Renderer *renderer;
 /**
+ * The background image.
+ */
+SDL_Surface *image;
+/**
+ * Texture for the background.
+ */
+SDL_Texture *texture;
+/**
+ * Rectangle to constrain the background.
+ */
+SDL_Rect *dstrect;
+/**
  * The keypress handler, or NULL if none has been configured.
  */
 key_handler_t key_handler = NULL;
@@ -132,6 +144,7 @@ void sdl_init(vector_t min, vector_t max) {
         SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
+    sdl_init_background();
 }
 
 bool sdl_is_done() {
@@ -140,6 +153,10 @@ bool sdl_is_done() {
     while (SDL_PollEvent(event)) {
         switch (event->type) {
             case SDL_QUIT:
+                SDL_DestroyTexture(texture);
+                SDL_FreeSurface(image);
+                SDL_DestroyRenderer(renderer);
+                SDL_DestroyWindow(window);
                 free(event);
                 return true;
             case SDL_MOUSEBUTTONDOWN:
@@ -236,6 +253,7 @@ void sdl_show(void) {
 
 void sdl_render_scene(scene_t *scene) {
     sdl_clear();
+    SDL_RenderCopy(renderer, texture, NULL, dstrect);
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);
@@ -265,4 +283,19 @@ double time_since_last_tick(void) {
         : 0.0; // return 0 the first time this is called
     last_clock = now;
     return difference;
+}
+
+void sdl_init_background(void) {
+    image = SDL_LoadBMP("background.bmp");
+    texture = SDL_CreateTextureFromSurface(renderer, image);
+    vector_t window_center = get_window_center();
+    vector_t max = vec_add(center, max_diff),
+             min = vec_subtract(center, max_diff);
+    vector_t max_pixel = get_window_position(max, window_center),
+             min_pixel = get_window_position(min, window_center);
+    dstrect = malloc(sizeof(*dstrect));
+    dstrect->x = min_pixel.x;
+    dstrect->y = max_pixel.y;
+    dstrect->w = max_pixel.x - min_pixel.x;
+    dstrect->h = min_pixel.y - max_pixel.y;
 }

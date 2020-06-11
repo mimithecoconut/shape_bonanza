@@ -21,6 +21,7 @@ const int SIZE_ALL = 25.0;
 const double GRAVITY = 150.0;
 const double FLOOR_THICKNESS = 50.0;
 const double BIG_MASS = 10000000000.0;
+
 /**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
@@ -218,7 +219,6 @@ void pit_up(scene_t *scene){
  * @param dropped representing dropped shape object
  * @param s representing current scene
  */
-
 void on_key(char key, key_event_type_t type, double held_time, void *s) {
     body_t *top = scene_get_top(s);
     double angle = body_get_orientation(top);
