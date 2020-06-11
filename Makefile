@@ -13,7 +13,7 @@ LIB_MATH = -lm
 # Compiler flags that link the program with the math and SDL libraries.
 # Note that $(...) substitutes a variable's value, so this line is equivalent to
 # LIBS = -lm -lSDL2 -lSDL2_gfx
-LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx -lSDL2_ttf -lSDL2_image
+LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx -lSDL2_mixer -lSDL2_ttf -lSDL2_image
 
 # List of demo programs
 DEMOS = finalgame test

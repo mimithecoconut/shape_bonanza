@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     int quit;
 
     if (argc == 1) {
-        font_path = "/home/cs3/cs3/shape_bonanza/FreeSans.ttf";
+        font_path = "/home/cs3/cs3/shape_bonanza/demo/FreeSans.ttf";
     } else if (argc == 2) {
         font_path = argv[1];
     } else {

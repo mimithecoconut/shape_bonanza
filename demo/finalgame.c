@@ -11,6 +11,7 @@
 #include "collision.h"
 #include "star.h"
 
+
 const int INIT_LIST = 5;
 const int WIDTH = 800.0;
 const int HEIGHT = 1010.0;
@@ -480,6 +481,7 @@ int main(int argc, char *argv[]) {
   double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
+  printf("A");
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;
@@ -497,5 +499,6 @@ int main(int argc, char *argv[]) {
     sdl_render_scene(scene);
   }
   scene_free(scene);
+
   return 0;
 }
