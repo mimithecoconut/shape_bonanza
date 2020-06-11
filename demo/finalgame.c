@@ -481,7 +481,6 @@ int main(int argc, char *argv[]) {
   double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
-  printf("A");
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;

@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <SDL2/begin_code.h>
 #include "sdl_wrapper.h"
-// #include <SDL_mixer.h>
 #include <stdio.h>
 
 const char WINDOW_TITLE[] = "Shape Bonanza";
@@ -129,34 +129,31 @@ char get_keycode(SDL_Keycode key) {
     }
 }
 
+void init_SDL_audio(){
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 ){
+        printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+    }
+  //Initialize SDL_mixer
+  if (Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0){
+     printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+  }
+}
 
-// void init_SDL_audio(){
-//   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 ){
-//         printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-//     }
-//   //Initialize SDL_mixer
-//   if (Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0){
-//      printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-//   }
-// }
-//
-// void loadMedia(){
-//   Mix_Music *gMusic = NULL;
-//   //Load music
-//   gMusic = Mix_LoadMUS( "/home/cs3/cs3/shape_bonanza/tonghua.wav");
-//   if (gMusic == NULL){
-//      printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
-//   }
-//   //If there is no music playing
-//   if( Mix_PlayingMusic() == 0 )
-//   {
-//       //Play the music
-//       Mix_PlayMusic( gMusic, -1 );
-//   }
-// }
+void load_bmusic(){
+  Mix_Music *gMusic = NULL;
+  //Load music
+  gMusic = Mix_LoadMUS( "/home/cs3/cs3/shape_bonanza/tonghua.wav");
+  if (gMusic == NULL){
+     printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+  }
+  //If there is no music playing
+  if(Mix_PlayingMusic() == 0){
+      //Play the music
+      Mix_PlayMusic( gMusic, -1 );
+  }
+}
 //
 // void close_audio(Mix_Music *gMusic){
-//   gPromptTexture.free();
 //
 //    //Free the music
 //    Mix_FreeMusic( gMusic );
@@ -164,7 +161,6 @@ char get_keycode(SDL_Keycode key) {
 //
 //    //Quit SDL subsystems
 //    Mix_Quit();
-//    IMG_Quit();
 // }
 
 void sdl_init(vector_t min, vector_t max) {
@@ -185,12 +181,11 @@ void sdl_init(vector_t min, vector_t max) {
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
     sdl_init_background();
-    // init_SDL_audio();
-    // loadMedia();
+    init_SDL_audio();
+    load_bmusic();
 }
 
 bool sdl_is_done() {
-
     SDL_Event *event = malloc(sizeof(*event));
     assert(event != NULL);
     while (SDL_PollEvent(event)) {
