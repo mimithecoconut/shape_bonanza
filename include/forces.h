@@ -97,9 +97,17 @@ void collision_handler_3(body_t *body1, body_t *body2, vector_t axis, void *aux)
  * @param body1 the first body
  * @param body2 the second body
  */
-
 void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2);
 
+/**
+ * Adds a force creator to a scene that applies gravity only to the first
+ * body.
+ *
+ * @param scene the scene containing the bodies
+ * @param g the gravitational proportionality constant
+ * @param body1 the first body
+ * @param body2 the second body
+ */
 void create_gravity_one(scene_t *scene, double g, body_t *body1, body_t *body2);
 
 /**
