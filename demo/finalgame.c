@@ -332,18 +332,10 @@ void remove_nearby(body_t *b, scene_t *s) {
  * @return number of objects touching b with the same color as b
  */
 int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
-    // double x_coord = body_get_centroid(b).x;
-    // double y_coord = body_get_centroid(b).y;
-    // double left_bound = x_coord - 2.1 * SIZE_ALL;
-    // double right_bound = x_coord + 2.1 * SIZE_ALL;
-    // double lower_bound = y_coord - 2.1 * SIZE_ALL;
-    // double upper_bound = y_coord + 2.1 * SIZE_ALL;
     for (size_t i = 0; i < scene_bodies(s); i++){
         body_t *body = scene_get_body(s, i);
         rgb_color_t c1 = body_get_color(b);
         rgb_color_t c2 = body_get_color(body);
-        // double x = body_get_centroid(body).x;
-        // double y = body_get_centroid(body).y;
         vector_t pos1 = body_get_centroid(b);
         vector_t pos2 = body_get_centroid(body);
         double distance = sqrt(pow((pos2.x - pos1.x), 2) + pow((pos2.y - pos1.y), 2));
