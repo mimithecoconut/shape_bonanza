@@ -6,6 +6,16 @@
 #include "list.h"
 #include "scene.h"
 #include "vector.h"
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/begin_code.h>
+#include <stdio.h>
+#include <SDL_ttf.h>
 
 // Values passed to a key handler when the given arrow key is pressed
 #define LEFT_ARROW 1
@@ -15,6 +25,63 @@
 #define SPACE 5
 
 #define LEFT_BUTTON 6
+
+/**
+ * The coordinate at the center of the screen.
+ */
+vector_t center;
+/**
+ * The coordinate difference from the center to the top right corner.
+ */
+vector_t max_diff;
+/**
+ * The SDL window where the scene is rendered.
+ */
+SDL_Window *window;
+/**
+ * The renderer used to draw the scene.
+ */
+SDL_Renderer *renderer;
+/**
+ * The background image.
+ */
+SDL_Surface *image;
+/**
+ * Texture for the background.
+ */
+SDL_Texture *texture;
+/**
+ * Rectangle to constrain the background.
+ */
+SDL_Rect *dstrect;
+// /**
+//  * The keypress handler, or NULL if none has been configured.
+//  */
+// key_handler_t key_handler = NULL;
+//
+// /**
+//  * The mouse click handler, or NULL if none has been configured.
+//  */
+// mouse_handler_t mouse_handler = NULL;
+
+/**
+ * SDL's timestamp when a key was last pressed or released.
+ * Used to mesasure how long a key has been held.
+ */
+uint32_t key_start_timestamp;
+/**
+ * The value of clock() when time_since_last_tick() was last called.
+ * Initially 0.
+ */
+clock_t last_clock;
+/**
+ * Body to be passed to key_handler, or NULL if none has been configured.
+ */
+void *body;
+/**
+ * Scene to be passed to key_handler, or NULL if none has been configured.
+ */
+void *scene;
 
 /**
  * The possible types of key events.
