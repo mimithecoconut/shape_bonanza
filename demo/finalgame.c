@@ -181,17 +181,17 @@ body_t *reset_dropped(scene_t *scene){
  * @param the scene with the shapes
  */
 void pit_up(scene_t *scene){
-  char *status = malloc(sizeof(char));
-  *status = 'p';
   for (size_t i = 0; i < scene_bodies(scene); i++){
+    char *status = malloc(sizeof(char));
+    *status = 'p';
     body_t *body = scene_get_body(scene, i);
     vector_t force = body_get_force(body);
-    if (force.x == 0.0 && force.y == 0.0 && *(char *)body_get_info(body) == 'd'){
-      body_set_info(body, status);
-    }
     if (*(char *)body_get_info(body) == 'p'){
       vector_t centroid = body_get_centroid(body);
       body_set_centroid(body, (vector_t) {centroid.x, centroid.y + 2 *SIZE_ALL});
+    }
+    if (force.x == 0.0 && force.y == 0.0 && *(char *)body_get_info(body) == 'd'){
+      body_set_info(body, status);
     }
   }
 }
@@ -348,6 +348,9 @@ void destroy(body_t *body_1, body_t *body_2, vector_t axis, void *aux) {
         remove_nearby(body_1, (scene_t*) aux);
     }
     else if (*(char*)body_get_info(body_1) != 'f') {
+        char *status = malloc(sizeof(char));
+        *status = 'p';
+        body_set_info(body_1, status);
         touching_colors(body_1, (scene_t*) aux);
     }
 }
@@ -432,7 +435,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
     body_set_force(floor, VEC_ZERO);
     body_set_velocity(floor, VEC_ZERO);
     char *status = malloc(sizeof(char));
-    *status = 'p';
+    *status = 'd';
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
@@ -462,7 +465,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
 bool game_over(scene_t *scene){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *body = scene_get_body(scene, i);
-    if (body_get_centroid(body).y > HEIGHT){
+    if (body_get_centroid(body).y > HEIGHT && *(char *)body_get_info(body) == 'p'){
       return true;
     }
   }
@@ -487,6 +490,7 @@ void scene_clear(scene_t *scene) {
 
 
 int main(int argc, char *argv[]) {
+  bool game_ended = false;
   SDL_Rect rect1, rect2;
   SDL_Texture *texture1, *texture2;
   char *font_path;
@@ -522,7 +526,9 @@ int main(int argc, char *argv[]) {
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;
-    total_time += time_elapsed;
+    if (!game_ended) {
+        total_time += time_elapsed;
+    }
 
     if (total_time_elapsed > 5.0) {
         total_time_elapsed = 0.0;
@@ -534,17 +540,19 @@ int main(int argc, char *argv[]) {
     sprintf(score_msg, "%i", score);
     char time_msg[15];
     sprintf(time_msg, "%d", (int) total_time);
-    get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
-    get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
-    scene_tick(scene, time_elapsed);
-    // if (game_over(scene)){
-    //   scene_clear(scene);
-    //   sdl_render_scene(scene);
-    //   sdl_show();
-    //   break;
-    // }
-    bound(scene);
-    sdl_render_scene(scene);
+    if (!game_over(scene)) {
+        get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
+        get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
+        scene_tick(scene, time_elapsed);
+        bound(scene);
+        sdl_render_scene(scene);
+    }
+    else {
+        game_ended = true;
+        sdl_init_game_over();
+        get_text_and_rect(renderer, 410, 240, concat("Score: ", score_msg), font, &texture1, &rect1);
+        get_text_and_rect(renderer, 410, 281, concat("Time: ", time_msg), font, &texture2, &rect2);
+    }
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
     SDL_RenderCopy(renderer, texture2, NULL, &rect2);
     sdl_show();

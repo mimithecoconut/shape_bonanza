@@ -315,6 +315,12 @@ double time_since_last_tick(void) {
     return difference;
 }
 
+void sdl_init_game_over(void) {
+    image = SDL_LoadBMP("resources/game_over.bmp");
+    texture = SDL_CreateTextureFromSurface(renderer, image);
+    SDL_RenderCopy(renderer, texture, NULL, dstrect);
+}
+
 void sdl_init_background(void) {
     image = SDL_LoadBMP("resources/background.bmp");
     texture = SDL_CreateTextureFromSurface(renderer, image);
