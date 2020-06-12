@@ -15,11 +15,11 @@
 const int INIT_LIST = 5;
 const int WIDTH = 800.0;
 const int HEIGHT = 1010.0;
-const int MASS = 100.0;
+const int MASS = 1000.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
 const int SIZE_ALL = 25.0;
-const double GRAVITY = 150.0;
+const double GRAVITY = 250.0;
 const double FLOOR_THICKNESS = 50.0;
 const double BIG_MASS = 10000000000.0;
 
@@ -124,18 +124,6 @@ body_t *init_rectangle(double width, double height, vector_t centroid, char s) {
     body_set_centroid(toReturn, centroid);
     return toReturn;
 }
-
-// /**
-// * Initializes the floor of the game offscreen and gives it infinite mass
-// *
-// * @param scene to add floor
-// */
-// body_t *init_floor(scene_t *scene){
-//   body_t *floor = init_rectangle(2 * WIDTH, FLOOR_THICKNESS, \
-//   (vector_t) {WIDTH / 2, -FLOOR_THICKNESS / 2 + 10.0}, 'f');
-//   body_set_color(floor, (rgb_color_t){0, 0, 0});
-//   return floor;
-// }
 
 /**
  * Initializes bodies offscreen representing walls bounding the windows
@@ -485,7 +473,8 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
 bool game_over(scene_t *scene){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *body = scene_get_body(scene, i);
-    if (body_get_centroid(body).y > HEIGHT - SIZE_ALL){
+    if (body_get_centroid(body).y > HEIGHT - SIZE_ALL && \
+    *(char *)body_get_info(body) != 't' && *(char *)body_get_info(body) != 'b'){
       return true;
     }
   }
@@ -500,7 +489,9 @@ bool game_over(scene_t *scene){
 void scene_clear(scene_t *scene) {
     for (size_t j = 0; j < scene_bodies(scene); j++) {
         body_t *body = scene_get_body(scene, j);
-        body_remove(body);
+        if (*(char *)body_get_info(body) != 't' || *(char *)body_get_info(body) != 'f'){
+          body_remove(body);
+        }
     }
     scene_tick(scene, 0);
 }
@@ -543,7 +534,8 @@ int main(int argc, char *argv[]) {
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;
     total_time += time_elapsed;
-    if (total_time_elapsed > 10.0) {
+
+    if (total_time_elapsed > 5.0) {
         total_time_elapsed = 0.0;
         pit_up(scene);
         init_one_row(scene);
@@ -556,18 +548,19 @@ int main(int argc, char *argv[]) {
     get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
     get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
     scene_tick(scene, time_elapsed);
-    // use scene_get_score(scene) to get the score
-    //   if (game_over){
-    //  scene_clear();
-    // insert text: game over
-    //}
+    // if (game_over(scene)){
+    //   scene_clear(scene);
+    //   sdl_render_scene(scene);
+    //   SDL_RenderCopy(renderer, texture1, NULL, &rect1);
+    //   SDL_RenderCopy(renderer, texture2, NULL, &rect2);
+    //   sdl_show();
+    //   break;
     // }
     bound(scene);
     sdl_render_scene(scene);
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
     SDL_RenderCopy(renderer, texture2, NULL, &rect2);
     sdl_show();
-
   }
   SDL_DestroyTexture(texture1);
   SDL_DestroyTexture(texture2);
