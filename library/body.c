@@ -29,7 +29,7 @@ body_t *body_init_with_info(list_t *shape, double mass, rgb_color_t color, void 
   toReturn->info = info;
   toReturn->info_freer = info_freer;
   return toReturn;
-  }
+}
 
 void body_free(body_t *body){
   list_free(body->shape);

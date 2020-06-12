@@ -24,29 +24,6 @@ const double FLOOR_THICKNESS = 50.0;
 const double BIG_MASS = 10000000000.0;
 
 /**
-  * x, y: upper left corner.
-  * texture, rect: outputs.
-*/
-void get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
-        TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect) {
-    int text_width;
-    int text_height;
-    SDL_Surface *surface;
-    SDL_Color textColor = {255, 255, 255, 0};
-
-    surface = TTF_RenderText_Solid(font, text, textColor);
-    *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    text_width = surface->w;
-    text_height = surface->h;
-    SDL_FreeSurface(surface);
-    rect->x = x;
-    rect->y = y;
-    rect->w = text_width;
-    rect->h = text_height;
-}
-
-
-/**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
  * @return list_t of colors for shape
@@ -337,9 +314,10 @@ int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
         body_t *body = scene_get_body(s, i);
         rgb_color_t c1 = body_get_color(b);
         rgb_color_t c2 = body_get_color(body);
-        if (!body_equals(body, b) &&
-          find_collision(b->shape, body->shape).collided &&
-          c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
+        vector_t pos1 = body_get_centroid(b);
+        vector_t pos2 = body_get_centroid(body);
+        double distance = sqrt(pow((pos2.x - pos1.x), 2) + pow((pos2.y - pos1.y), 2));
+        if (distance < 2.5 * SIZE_ALL && c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
             if (!list_contains(l, body)) {
                 list_add(l, body);
                 return count_colors(body, s, list_size(l), l);
@@ -411,7 +389,7 @@ void create_nearby_collision(scene_t *scene, body_t *body){
       create_physics_collision(scene, 0.0, body, other);
     }
     if (*(char *)body_get_info(body) != 'p' && x > left_bound && x < right_bound && *(char *)body_get_info(other) == 'p'){
-      create_collision(scene, body, other, destroy, scene, (free_func_t)body_free);
+      create_collision(scene, body, other, destroy, scene, free);
     }
   }
 }
@@ -431,12 +409,12 @@ void init_one_row(scene_t *scene){
     *status = 'p';
     body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
     body_set_info(shape1, status);
-    // create_nearby_collision(scene, shape1);
+    //create_nearby_collision(scene, shape1);
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 0));
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 1));
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 2));
     body_set_velocity(shape1, VEC_ZERO);
-    // create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
+    //create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
     body_set_color(shape1, *color);
     scene_add_body(scene, shape1);
     rand_index_n = 8 - rand_int(4);
@@ -552,24 +530,31 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "error: font not found\n");
       exit(EXIT_FAILURE);
   }
-  get_text_and_rect(renderer, 0, 0, "hello", font, &texture1, &rect1);
-  get_text_and_rect(renderer, 0, rect1.y + rect1.h, "world", font, &texture2, &rect2);
   scene_t *scene = scene_init();
   init_walls(scene);
   body_t *dropped = reset_dropped(scene);
   scene_set_top(scene, dropped);
   init_pit(scene);
+  double total_time = 0.0;
   double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;
+    total_time += time_elapsed;
     if (total_time_elapsed > 10.0) {
         total_time_elapsed = 0.0;
         pit_up(scene);
         init_one_row(scene);
     }
+    int score = scene_get_score(scene);
+    char score_msg[15];
+    sprintf(score_msg, "%i", score);
+    char time_msg[15];
+    sprintf(time_msg, "%d", (int) total_time);
+    get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
+    get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
     scene_tick(scene, time_elapsed);
     // use scene_get_score(scene) to get the score
     //   if (game_over){
@@ -581,6 +566,7 @@ int main(int argc, char *argv[]) {
     sdl_render_scene(scene);
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
     SDL_RenderCopy(renderer, texture2, NULL, &rect2);
+    sdl_show();
 
   }
   SDL_DestroyTexture(texture1);

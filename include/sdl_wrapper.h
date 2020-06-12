@@ -120,6 +120,16 @@ typedef enum {
     MOUSE_RELEASED
 } mouse_event_type_t;
 
+/**
+  * x, y: upper left corner.
+  * texture, rect: outputs.
+*/
+void get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
+        TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect);
+
+/** concatenates two strings */
+char* concat(const char *s1, const char *s2);
+
 typedef void (*mouse_handler_t)(char key, mouse_event_type_t type, void *scene);
 /**
  * Initializes the SDL window and renderer.
