@@ -45,6 +45,7 @@ void get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
     rect->h = text_height;
 }
 
+
 /**
  * Returns a list of rgb_color_t pointers for the colors of shape
  *
@@ -533,7 +534,7 @@ int main(int argc, char *argv[]) {
   char *font_path;
 
   if (argc == 1) {
-      font_path = "/Users/hannahchen/Shape_Bonanza/demo/FreeSans.ttf";
+      font_path = "/home/cs3/cs3/shape_bonanza/demo/FreeSans.ttf";
   } else if (argc == 2) {
       font_path = argv[1];
   } else {
