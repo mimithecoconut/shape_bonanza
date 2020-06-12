@@ -224,6 +224,11 @@ void sdl_on_mouse(mouse_handler_t handler, void *b, void *s);
 double time_since_last_tick(void);
 
 /**
+ * Initializes the game over screen in the game.
+ */
+void sdl_init_game_over(void);
+
+/**
  * Initializes the background in the game
  */
 void sdl_init_background(void);
