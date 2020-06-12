@@ -553,8 +553,8 @@ int main(int argc, char *argv[]) {
     sprintf(score_msg, "%i", score);
     char time_msg[15];
     sprintf(time_msg, "%d", (int) total_time);
-    get_text_and_rect(renderer, 590, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
-    get_text_and_rect(renderer, 600, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
+    get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
+    get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
     scene_tick(scene, time_elapsed);
     // use scene_get_score(scene) to get the score
     //   if (game_over){
