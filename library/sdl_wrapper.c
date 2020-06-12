@@ -21,6 +21,37 @@ void *body = NULL;
 
 void *scene = NULL;
 
+/**
+  * x, y: upper left corner.
+  * texture, rect: outputs.
+*/
+void get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
+        TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect) {
+    int text_width;
+    int text_height;
+    SDL_Surface *surface;
+    SDL_Color textColor = {0, 0, 0, 0};
+
+    surface = TTF_RenderText_Solid(font, text, textColor);
+    *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    text_width = surface->w;
+    text_height = surface->h;
+    SDL_FreeSurface(surface);
+    rect->x = x;
+    rect->y = y;
+    rect->w = text_width;
+    rect->h = text_height;
+}
+
+/** concatenates two strings */
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1);
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
     int *width = malloc(sizeof(*width)),
@@ -92,7 +123,7 @@ void init_SDL_audio(){
 void load_bmusic(){
   Mix_Music *gMusic = NULL;
   //Load music
-  gMusic = Mix_LoadMUS("resources/tonghua.wav");
+  gMusic = Mix_LoadMUS("/Users/hannahchen/Shape_Bonanza/resources/tonghua.wav");
   if (gMusic == NULL){
      printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
   }
@@ -105,7 +136,7 @@ void load_bmusic(){
 
 void load_soundeffect(){
   Mix_Chunk *bloop = NULL;
-  bloop = Mix_LoadWAV("resources/bloop_x.wav");
+  bloop = Mix_LoadWAV("/Users/hannahchen/Shape_Bonanza/resources/bloop_x.wav");
   if (bloop == NULL){
      printf ("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
   }
@@ -261,7 +292,6 @@ void sdl_render_scene(scene_t *scene) {
     }
     Mix_Quit();
     //close_audio();
-    sdl_show();
 }
 
 void sdl_on_key(key_handler_t handler, void *b, void *s) {
