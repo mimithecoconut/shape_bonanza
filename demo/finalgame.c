@@ -535,11 +535,7 @@ int main(int argc, char *argv[]) {
   char *font_path;
 
   if (argc == 1) {
-<<<<<<< HEAD
-      font_path = "/home/cs3/cs3/shape_bonanza/demo/FreeSans.ttf";
-=======
       font_path = "resources/FreeSans.ttf";
->>>>>>> 58e9b9771a5d856e7476f04a0c0d84f0938b42b9
   } else if (argc == 2) {
       font_path = argv[1];
   } else {
