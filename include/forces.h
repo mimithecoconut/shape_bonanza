@@ -37,10 +37,21 @@ typedef void (*collision_handler_t)
  */
 void gravity_creator(void *aux);
 
+/**
+ * Calculates the force of gravity on the given objects
+ *
+ * @param aux struct containing information about bodies to apply force and
+ * constants
+ */
 vector_t get_gravity_one(void *aux);
 
+/**
+ * Applies the force of gravity on the given objects
+ *
+ * @param aux struct containing information about bodies to apply force and
+ * constants
+ */
 void gravity_creator_one(void *aux);
-
 
 /**
  * Calculates the spring force on the given objects and applies the force
@@ -59,11 +70,16 @@ void spring_creator(void *aux);
  * constants
  */
 void drag_creator(void *aux);
+
 /**
  * Handles collision of two bodies
  * Does body_remove() on collided bodies
  *
- * @param aux, collision axis as a vector, two collided bodies body1 and body2
+ * @param body1 the first body
+ * @param body2 the second body
+ * @param axis collision axis as a vector
+ * @param aux, struct containing information about body to apply force and
+ * constants
  */
 void collision_handler_1(body_t *body1, body_t *body2, vector_t axis, void *aux);
 
@@ -77,11 +93,23 @@ void collision_creator(void *aux);
 /**
  * Handles and applies impulses
  *
- * @param aux, collision axis as a vector, two collided bodies body1 and body2
+ * @param body1 the first body
+ * @param body2 the second body
+ * @param axis collision axis as a vector
+ * @param aux, struct containing information about body to apply force and
+ * constants
  */
-
 void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux);
 
+/**
+ * Applies the normal force to objects
+ *
+ * @param body1 the first body
+ * @param body2 the second body
+ * @param axis collision axis as a vector
+ * @param aux, struct containing information about body to apply force and
+ * constants
+ */
 void collision_handler_3(body_t *body1, body_t *body2, vector_t axis, void *aux);
 
 /**
@@ -97,9 +125,17 @@ void collision_handler_3(body_t *body1, body_t *body2, vector_t axis, void *aux)
  * @param body1 the first body
  * @param body2 the second body
  */
-
 void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2);
 
+/**
+ * Adds a force creator to a scene that applies gravity only to the first
+ * body.
+ *
+ * @param scene the scene containing the bodies
+ * @param g the gravitational proportionality constant
+ * @param body1 the first body
+ * @param body2 the second body
+ */
 void create_gravity_one(scene_t *scene, double g, body_t *body1, body_t *body2);
 
 /**

@@ -224,8 +224,6 @@ void body_add_force(body_t *body, vector_t force);
  * @param body a pointer to a body returned from body_init()
  * @param impulse the impulse vector to apply
  */
-
-
 void body_add_impulse(body_t *body, vector_t impulse);
 
 /**

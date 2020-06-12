@@ -11,7 +11,6 @@
 #include "collision.h"
 #include "star.h"
 
-
 const int INIT_LIST = 5;
 const int WIDTH = 800.0;
 const int HEIGHT = 1010.0;
@@ -76,11 +75,11 @@ body_t *init_polygon(double n, double size, vector_t centroid){
 }
 
 /**
-* Returns a pointer to the special object (star)
-*
-* @param size the radius of special object
-* @param centroid
-*/
+ * Returns a pointer to the special object (star)
+ *
+ * @param size the radius of special object
+ * @param centroid
+ */
 body_t *init_special(double size, vector_t centroid){
   star_t *str = init_star(centroid, PTS, size, 0.0, 0.0);
   char *status = malloc(sizeof(char));
@@ -142,24 +141,22 @@ void init_walls(scene_t *scene) {
     body_set_color(floor, (rgb_color_t) {1, 1, 1});
     body_set_mass(floor, BIG_MASS);
     scene_add_body(scene, floor);
-    // scene_add_body(scene, left_wall);
-    // scene_add_body(scene, right_wall);
 }
 
 /**
-* Returns random integer from 0 to upperbound inclusive
-*
-* @param upper as upperbound
-*/
+ * Returns random integer from 0 to upperbound inclusive
+ *
+ * @param upper as upperbound
+ */
 int rand_int(int upper){
   return (int) floor((upper + 1) *((float)rand()/ (float)RAND_MAX));
 }
 
 /**
-* Resets the dropped shape at the top with random color and n
-*
-*@param scene where dropped shape is added to
-*/
+ * Resets the dropped shape at the top with random color and n
+ *
+ * @param scene where dropped shape is added to
+ */
 body_t *reset_dropped(scene_t *scene){
   list_t *colors = init_colors();
   int rand_index_c = rand_int(6);
@@ -178,11 +175,11 @@ body_t *reset_dropped(scene_t *scene){
   scene_add_body(scene, dropped);
   return dropped;
 }
-  /**
-  * Moves shapes in the pit up by one row
-  *
-  * @param the scene with the shapes
-  */
+/**
+ * Moves shapes in the pit up by one row
+ *
+ * @param the scene with the shapes
+ */
 void pit_up(scene_t *scene){
   char *status = malloc(sizeof(char));
   *status = 'p';
@@ -308,11 +305,11 @@ int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
         if (distance < 2.5 * SIZE_ALL && c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
             if (!list_contains(l, body)) {
                 list_add(l, body);
-                return count_colors(body, s, list_size(l), l);
+                count_colors(body, s, list_size(l), l);
             }
         }
     }
-    return count;
+    return list_size(l);
 }
 
 /**
@@ -356,13 +353,13 @@ void destroy(body_t *body_1, body_t *body_2, vector_t axis, void *aux) {
 }
 
 /**
-* Creates physics collision for shapes in scene that are within
-* 4 radius of the body
-* Creates collisions with disappearance of same colors
-*
-* @param scene with all the bodies
-* @param body that we are finding nearby shapes to
-*/
+ * Creates physics collision for shapes in scene that are within
+ * 4 radius of the body
+ * Creates collisions with disappearance of same colors
+ *
+ * @param scene with all the bodies
+ * @param body that we are finding nearby shapes to
+ */
 void create_nearby_collision(scene_t *scene, body_t *body){
   double x_coord = body_get_centroid(body).x;
   double left_bound = x_coord - 4 * SIZE_ALL;
@@ -383,10 +380,10 @@ void create_nearby_collision(scene_t *scene, body_t *body){
 }
 
 /**
-* Initializes one row of shapes in the pit and puts all shapes into scene
-*
-* @param the scene to put the row in
-*/
+ * Initializes one row of shapes in the pit and puts all shapes into scene
+ *
+ * @param the scene to put the row in
+ */
 void init_one_row(scene_t *scene){
   int rand_index_n = 8 - rand_int(4);
   list_t *colors = init_colors();
@@ -397,12 +394,7 @@ void init_one_row(scene_t *scene){
     *status = 'p';
     body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
     body_set_info(shape1, status);
-    //create_nearby_collision(scene, shape1);
-    // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 0));
-    // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 1));
-    // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 2));
     body_set_velocity(shape1, VEC_ZERO);
-    //create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
     body_set_color(shape1, *color);
     scene_add_body(scene, shape1);
     rand_index_n = 8 - rand_int(4);
@@ -411,11 +403,11 @@ void init_one_row(scene_t *scene){
   }
 }
 
-/*
-* Initializes the beginning of the game with 4 rows of shapes in the pit
-*
-* @param scene to put shapes
-*/
+/**
+ * Initializes the beginning of the game with 4 rows of shapes in the pit
+ *
+ * @param scene to put shapes
+ */
 void init_pit(scene_t *scene){
   for (int i = 0; i < 5; i++){
     init_one_row(scene);
@@ -446,9 +438,6 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
           if (button == LEFT_BUTTON){
             body_t *dropped = scene_get_top(s);
             create_gravity_one(s, GRAVITY, dropped, floor);
-            //create_physics_collision(s, 0.0, dropped, floor);
-            // create_physics_collision(s, 1.0, dropped, scene_get_body(s, 1));
-            // create_physics_collision(s, 1.0, dropped, scene_get_body(s, 2));
             create_nearby_collision(s, dropped);
             if (*(char *)body_get_info(dropped) == 'b') {
               scene_add_score(s, 64);
@@ -464,12 +453,12 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
     }
 }
 
-  /*
-  * Checks to see if shapes in pit have reached the top of window
-  * @ returns true if so, returns false if not
-  *
-  * @param scene
-  */
+/**
+ * Checks to see if shapes in pit have reached the top of window
+ * @ returns true if so, returns false if not
+ *
+ * @param scene
+ */
 bool game_over(scene_t *scene){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *body = scene_get_body(scene, i);
