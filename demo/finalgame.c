@@ -17,7 +17,7 @@ const int HEIGHT = 1010.0;
 const int MASS = 1000.0;
 const int PTS = 5;
 const double DROPPED_V = 400.0;
-const int SIZE_ALL = 25.0;
+const int SIZE_ALL = 25;
 const double GRAVITY = 250.0;
 const double FLOOR_THICKNESS = 50.0;
 const double BIG_MASS = 10000000000.0;
@@ -440,7 +440,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
             create_gravity_one(s, GRAVITY, dropped, floor);
             create_nearby_collision(s, dropped);
             if (*(char *)body_get_info(dropped) == 'b') {
-              scene_add_score(s, 64);
+              scene_add_score(s, 16);
             }
             if (*(char *)body_get_info(dropped) == 't') {
               body_set_info(dropped, status);
@@ -462,8 +462,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
 bool game_over(scene_t *scene){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *body = scene_get_body(scene, i);
-    if (body_get_centroid(body).y > HEIGHT - SIZE_ALL && \
-    *(char *)body_get_info(body) != 't' && *(char *)body_get_info(body) != 'b'){
+    if (body_get_centroid(body).y > HEIGHT){
       return true;
     }
   }
@@ -478,7 +477,7 @@ bool game_over(scene_t *scene){
 void scene_clear(scene_t *scene) {
     for (size_t j = 0; j < scene_bodies(scene); j++) {
         body_t *body = scene_get_body(scene, j);
-        if (*(char *)body_get_info(body) != 't' || *(char *)body_get_info(body) != 'f'){
+        if (*(char *)body_get_info(body) != 'w' || *(char *)body_get_info(body) != 'f'){
           body_remove(body);
         }
     }
@@ -519,6 +518,7 @@ int main(int argc, char *argv[]) {
   double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
+
   while (!sdl_is_done()){
     double time_elapsed = time_since_last_tick();
     total_time_elapsed += time_elapsed;
@@ -537,14 +537,12 @@ int main(int argc, char *argv[]) {
     get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
     get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
     scene_tick(scene, time_elapsed);
-    // if (game_over(scene)){
-    //   scene_clear(scene);
-    //   sdl_render_scene(scene);
-    //   SDL_RenderCopy(renderer, texture1, NULL, &rect1);
-    //   SDL_RenderCopy(renderer, texture2, NULL, &rect2);
-    //   sdl_show();
-    //   break;
-    // }
+    if (game_over(scene)){
+      scene_clear(scene);
+      sdl_render_scene(scene);
+      sdl_show();
+      break;
+    }
     bound(scene);
     sdl_render_scene(scene);
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
