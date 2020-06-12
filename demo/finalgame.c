@@ -66,8 +66,8 @@ body_t *init_polygon(double n, double size, vector_t centroid){
   double angle = 2 * M_PI / n;
   for (int i = 0; i < n; i ++){
     vector_t *point = malloc(sizeof(vector_t));
-    point->x = centroid.x + (size + 2) * cos(i * angle);
-    point->y = centroid.y + (size + 2) * sin(i * angle);
+    point->x = centroid.x + (size + 2.5) * cos(i * angle);
+    point->y = centroid.y + (size + 2.5) * sin(i * angle);
     list_add(points, point);
   }
   char *status = malloc(sizeof(char));
@@ -335,13 +335,17 @@ void touching_colors(body_t *b, scene_t *s) {
     list_t *touching = list_init(INIT_LIST, (free_func_t) body_free,
       (equality_func_t) body_equals);
     list_add(touching, b);
-    if (count_colors(b, s, list_size(touching), touching) >= 3) {
+    int num_touching = count_colors(b, s, list_size(touching), touching);
+    if (num_touching >= 3) {
         for (size_t i = 0; i < list_size(touching); i++) {
             body_remove(list_get(touching, i));
         }
+        scene_add_score(s, num_touching);
     }
     free(touching);
 }
+
+
 
 /**
  * Collision handler to destroy objects if at least 3 of one color are touching
@@ -363,6 +367,7 @@ void destroy(body_t *body_1, body_t *body_2, vector_t axis, void *aux) {
 /**
 * Creates physics collision for shapes in scene that are within
 * 4 radius of the body
+* Creates collisions with disappearance of same colors
 *
 * @param scene with all the bodies
 * @param body that we are finding nearby shapes to
@@ -374,15 +379,13 @@ void create_nearby_collision(scene_t *scene, body_t *body){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *other = scene_get_body(scene, i);
     double x = body_get_centroid(other).x;
+    body_set_mass(other, BIG_MASS);
+    body_set_velocity(other, VEC_ZERO);
     if (x > left_bound && x < right_bound && *(char *)body_get_info(other) != 't'
       && *(char *)body_get_info(other) != 'b'){
-      body_set_mass(other, BIG_MASS);
-      body_set_velocity(other, VEC_ZERO);
       create_physics_collision(scene, 0.0, body, other);
     }
     if (*(char *)body_get_info(body) != 'p' && x > left_bound && x < right_bound && *(char *)body_get_info(other) == 'p'){
-      body_set_mass(other, BIG_MASS);
-      body_set_velocity(other, VEC_ZERO);
       create_collision(scene, body, other, destroy, scene, (free_func_t)body_free);
     }
   }
@@ -457,6 +460,9 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
             create_physics_collision(s, 0.0, dropped, scene_get_body(s, 1));
             create_physics_collision(s, 0.0, dropped, scene_get_body(s, 2));
             create_nearby_collision(s, dropped);
+            if (*(char *)body_get_info(dropped) == 'b') {
+              scene_add_score(s, 64);
+            }
             if (*(char *)body_get_info(dropped) == 't') {
               body_set_info(dropped, status);
             }
@@ -466,8 +472,38 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
         scene_set_top(s, reset_dropped(s));
         break;
     }
-    //body_remove(floor);
 }
+
+  /*
+  * Checks to see if shapes in pit have reached the top of window
+  * @ returns true if so, returns false if not
+  *
+  * @param scene
+  */
+bool game_over(scene_t *scene){
+  for (size_t i = 0; i < scene_bodies(scene); i++){
+    body_t *body = scene_get_body(scene, i);
+    if (body_get_centroid(body).y > HEIGHT - SIZE_ALL){
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Removes all bodies from the scene
+ *
+ * @param scene the scene containing the game
+ */
+void scene_clear(scene_t *scene) {
+    for (size_t j = 0; j < scene_bodies(scene); j++) {
+        body_t *body = scene_get_body(scene, j);
+        body_remove(body);
+    }
+    scene_tick(scene, 0);
+}
+
+
 
 int main(int argc, char *argv[]) {
   if (argc != 1) {
@@ -482,7 +518,6 @@ int main(int argc, char *argv[]) {
   body_t *dropped = reset_dropped(scene);
   scene_set_top(scene, dropped);
   init_pit(scene);
-  int row_count = 4;
   double total_time_elapsed = 0.0;
   sdl_on_key((key_handler_t) on_key, dropped, scene);
   sdl_on_mouse((mouse_handler_t) on_mouse, dropped, scene);
@@ -493,11 +528,13 @@ int main(int argc, char *argv[]) {
         total_time_elapsed = 0.0;
         pit_up(scene);
         init_one_row(scene);
-        row_count ++;
     }
     scene_tick(scene, time_elapsed);
-    // if (row_count > 20){
-    //   init_pit(scene);
+    // use scene_get_score(scene) to get the score
+    //   if (game_over){
+    //  scene_clear();
+    // insert text: game over
+    //}
     // }
     bound(scene);
     sdl_render_scene(scene);

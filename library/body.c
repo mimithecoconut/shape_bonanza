@@ -108,7 +108,7 @@ void body_set_force(body_t *body, vector_t force) {
 bool body_equals(body_t *body1, body_t *body2) {
     rgb_color_t c1 = body_get_color(body1);
     rgb_color_t c2 = body_get_color(body2);
-    if (body1->mass != body2->mass || !(c1.r == c2.r && c1.g == c2.g && c1.b ==
+    if (!(c1.r == c2.r && c1.g == c2.g && c1.b ==
       c2.b) || list_size(body1->shape) != list_size(body2->shape)) {
         return false;
     }

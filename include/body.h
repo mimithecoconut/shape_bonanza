@@ -196,7 +196,7 @@ void body_set_info (body_t *body, void *info);
 void body_set_force(body_t *body, vector_t force);
 
 /**
- * Checks whether the two bodies are equal
+ * Checks whether the two bodies are equal (all fields except mass)
  *
  * @param body_1 first body to compare
  * @param body_2 second body to compare

@@ -56,6 +56,8 @@ typedef struct scene {
   list_t *forces;
   // the shape that is at the top of game
   body_t *top;
+  // current score of the scene
+  int score;
 } scene_t;
 
 scene_t *scene_init(void) {
@@ -65,6 +67,7 @@ scene_t *scene_init(void) {
     (equality_func_t) body_equals);
   toReturn->forces = list_init(1, (free_func_t) force_free, NULL);
   toReturn->top = NULL;
+  toReturn->score = 0;
   return toReturn;
 }
 
@@ -90,8 +93,16 @@ body_t *scene_get_top(scene_t *scene){
   return scene->top;
 }
 
+int scene_get_score(scene_t *scene){
+  return scene->score;
+}
+
 void scene_set_top(scene_t *scene, body_t *body){
   scene->top = body;
+}
+
+void scene_add_score(scene_t *scene, int to_add){
+  scene->score += to_add;
 }
 
 void scene_add_body(scene_t *scene, body_t *body) {

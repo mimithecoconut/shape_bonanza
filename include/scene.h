@@ -121,7 +121,11 @@ force_t *scene_get_force(scene_t *scene, size_t index);
  */
 body_t *scene_get_top(scene_t *scene);
 
+int scene_get_score(scene_t *scene);
+
 void scene_set_top(scene_t *scene, body_t *body);
+
+void scene_add_score(scene_t *scene, int to_add);
 
 void scene_add_body(scene_t *scene, body_t *body);
 
