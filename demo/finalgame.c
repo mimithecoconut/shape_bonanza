@@ -537,12 +537,12 @@ int main(int argc, char *argv[]) {
     get_text_and_rect(renderer, 580, 0, concat("Score: ", score_msg), font, &texture1, &rect1);
     get_text_and_rect(renderer, 590, rect1.y + rect1.h, concat("Time: ", time_msg), font, &texture2, &rect2);
     scene_tick(scene, time_elapsed);
-    if (game_over(scene)){
-      scene_clear(scene);
-      sdl_render_scene(scene);
-      sdl_show();
-      break;
-    }
+    // if (game_over(scene)){
+    //   scene_clear(scene);
+    //   sdl_render_scene(scene);
+    //   sdl_show();
+    //   break;
+    // }
     bound(scene);
     sdl_render_scene(scene);
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
