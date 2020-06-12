@@ -1,47 +1,10 @@
-#include <assert.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/begin_code.h>
 #include "sdl_wrapper.h"
-#include <stdio.h>
 
 const char WINDOW_TITLE[] = "Shape Bonanza";
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
 
-/**
- * The coordinate at the center of the screen.
- */
-vector_t center;
-/**
- * The coordinate difference from the center to the top right corner.
- */
-vector_t max_diff;
-/**
- * The SDL window where the scene is rendered.
- */
-SDL_Window *window;
-/**
- * The renderer used to draw the scene.
- */
-SDL_Renderer *renderer;
-/**
- * The background image.
- */
-SDL_Surface *image;
-/**
- * Texture for the background.
- */
-SDL_Texture *texture;
-/**
- * Rectangle to constrain the background.
- */
-SDL_Rect *dstrect;
 /**
  * The keypress handler, or NULL if none has been configured.
  */
@@ -52,23 +15,10 @@ key_handler_t key_handler = NULL;
  */
 mouse_handler_t mouse_handler = NULL;
 
-/**
- * SDL's timestamp when a key was last pressed or released.
- * Used to mesasure how long a key has been held.
- */
-uint32_t key_start_timestamp;
-/**
- * The value of clock() when time_since_last_tick() was last called.
- * Initially 0.
- */
 clock_t last_clock = 0;
-/**
- * Body to be passed to key_handler, or NULL if none has been configured.
- */
+
 void *body = NULL;
-/**
- * Scene to be passed to key_handler, or NULL if none has been configured.
- */
+
 void *scene = NULL;
 
 /** Computes the center of the window in pixel coordinates */
