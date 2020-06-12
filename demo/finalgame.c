@@ -332,13 +332,22 @@ void remove_nearby(body_t *b, scene_t *s) {
  * @return number of objects touching b with the same color as b
  */
 int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
+    // double x_coord = body_get_centroid(b).x;
+    // double y_coord = body_get_centroid(b).y;
+    // double left_bound = x_coord - 2.1 * SIZE_ALL;
+    // double right_bound = x_coord + 2.1 * SIZE_ALL;
+    // double lower_bound = y_coord - 2.1 * SIZE_ALL;
+    // double upper_bound = y_coord + 2.1 * SIZE_ALL;
     for (size_t i = 0; i < scene_bodies(s); i++){
         body_t *body = scene_get_body(s, i);
         rgb_color_t c1 = body_get_color(b);
         rgb_color_t c2 = body_get_color(body);
-        if (!body_equals(body, b) &&
-          find_collision(b->shape, body->shape).collided &&
-          c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
+        // double x = body_get_centroid(body).x;
+        // double y = body_get_centroid(body).y;
+        vector_t pos1 = body_get_centroid(b);
+        vector_t pos2 = body_get_centroid(body);
+        double distance = sqrt(pow((pos2.x - pos1.x), 2) + pow((pos2.y - pos1.y), 2));
+        if (distance < 2.5 * SIZE_ALL && c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
             if (!list_contains(l, body)) {
                 list_add(l, body);
                 return count_colors(body, s, list_size(l), l);
@@ -430,12 +439,12 @@ void init_one_row(scene_t *scene){
     *status = 'p';
     body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
     body_set_info(shape1, status);
-    // create_nearby_collision(scene, shape1);
+    //create_nearby_collision(scene, shape1);
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 0));
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 1));
     // create_physics_collision(scene, 0.0, shape1, scene_get_body(scene, 2));
     body_set_velocity(shape1, VEC_ZERO);
-    // create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
+    //create_gravity_one(scene, GRAVITY, shape1, scene_get_body(scene, 0));
     body_set_color(shape1, *color);
     scene_add_body(scene, shape1);
     rand_index_n = 8 - rand_int(4);
