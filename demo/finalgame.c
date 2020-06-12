@@ -389,7 +389,7 @@ void create_nearby_collision(scene_t *scene, body_t *body){
       create_physics_collision(scene, 0.0, body, other);
     }
     if (*(char *)body_get_info(body) != 'p' && x > left_bound && x < right_bound && *(char *)body_get_info(other) == 'p'){
-      create_collision(scene, body, other, destroy, scene, (free_func_t)body_free);
+      create_collision(scene, body, other, destroy, scene, free);
     }
   }
 }

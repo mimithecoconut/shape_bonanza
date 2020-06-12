@@ -16,7 +16,7 @@ LIB_MATH = -lm
 LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx -lSDL2_mixer -lSDL2_ttf -lSDL2_image
 
 # List of demo programs
-DEMOS = finalgame test
+DEMOS = finalgame 
 # List of C files in "libraries" that we provide
 STAFF_LIBS = test_util sdl_wrapper SDL_ttf
 # List of C files in "libraries" that you will write

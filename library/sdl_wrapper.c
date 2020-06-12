@@ -123,7 +123,7 @@ void init_SDL_audio(){
 void load_bmusic(){
   Mix_Music *gMusic = NULL;
   //Load music
-  gMusic = Mix_LoadMUS("/Users/hannahchen/Shape_Bonanza/resources/tonghua.wav");
+  gMusic = Mix_LoadMUS("resources/tonghua.wav");
   if (gMusic == NULL){
      printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
   }
@@ -136,7 +136,7 @@ void load_bmusic(){
 
 void load_soundeffect(){
   Mix_Chunk *bloop = NULL;
-  bloop = Mix_LoadWAV("/Users/hannahchen/Shape_Bonanza/resources/bloop_x.wav");
+  bloop = Mix_LoadWAV("resources/bloop_x.wav");
   if (bloop == NULL){
      printf ("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
   }
