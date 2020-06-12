@@ -176,8 +176,8 @@ void init_walls(scene_t *scene) {
     body_set_color(floor, (rgb_color_t) {1, 1, 1});
     body_set_mass(floor, BIG_MASS);
     scene_add_body(scene, floor);
-    scene_add_body(scene, left_wall);
-    scene_add_body(scene, right_wall);
+    // scene_add_body(scene, left_wall);
+    // scene_add_body(scene, right_wall);
 }
 
 /**
@@ -287,9 +287,11 @@ void bound(scene_t *scene) {
     vector_t curr_pos = body_get_centroid(top);
     if (curr_pos.x + SIZE_ALL > WIDTH) {
         body_set_centroid(top, (vector_t) {WIDTH - SIZE_ALL, curr_pos.y});
+        body_set_velocity(top, VEC_ZERO);
     }
     else if (curr_pos.x - SIZE_ALL < 0) {
         body_set_centroid(top, (vector_t) {SIZE_ALL, curr_pos.y});
+        body_set_velocity(top, VEC_ZERO);
     }
 }
 
@@ -404,7 +406,7 @@ void create_nearby_collision(scene_t *scene, body_t *body){
     body_set_mass(other, BIG_MASS);
     body_set_velocity(other, VEC_ZERO);
     if (x > left_bound && x < right_bound && *(char *)body_get_info(other) != 't'
-      && *(char *)body_get_info(other) != 'b'){
+      && *(char *)body_get_info(other) != 'b' && *(char *)body_get_info(other) != 'w'){
       create_physics_collision(scene, 0.0, body, other);
     }
     if (*(char *)body_get_info(body) != 'p' && x > left_bound && x < right_bound && *(char *)body_get_info(other) == 'p'){
@@ -419,13 +421,13 @@ void create_nearby_collision(scene_t *scene, body_t *body){
 * @param the scene to put the row in
 */
 void init_one_row(scene_t *scene){
-  char *status = malloc(sizeof(char));
-  *status = 'p';
   int rand_index_n = 8 - rand_int(4);
   list_t *colors = init_colors();
   int rand_index_c = rand_int(6);
   rgb_color_t *color = list_get(colors, rand_index_c);
   for (int i = SIZE_ALL; i < WIDTH; i+= 2 * SIZE_ALL){
+    char *status = malloc(sizeof(char));
+    *status = 'p';
     body_t *shape1 = init_polygon(rand_index_n, SIZE_ALL, (vector_t){i, 10 + SIZE_ALL});
     body_set_info(shape1, status);
     // create_nearby_collision(scene, shape1);
@@ -447,7 +449,6 @@ void init_one_row(scene_t *scene){
 *
 * @param scene to put shapes
 */
-
 void init_pit(scene_t *scene){
   for (int i = 0; i < 5; i++){
     init_one_row(scene);
@@ -472,15 +473,15 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
     body_set_force(floor, VEC_ZERO);
     body_set_velocity(floor, VEC_ZERO);
     char *status = malloc(sizeof(char));
-    *status = 'd';
+    *status = 'p';
     switch(type){
       case MOUSE_PRESSED:
           if (button == LEFT_BUTTON){
             body_t *dropped = scene_get_top(s);
             create_gravity_one(s, GRAVITY, dropped, floor);
             //create_physics_collision(s, 0.0, dropped, floor);
-            create_physics_collision(s, 0.0, dropped, scene_get_body(s, 1));
-            create_physics_collision(s, 0.0, dropped, scene_get_body(s, 2));
+            // create_physics_collision(s, 1.0, dropped, scene_get_body(s, 1));
+            // create_physics_collision(s, 1.0, dropped, scene_get_body(s, 2));
             create_nearby_collision(s, dropped);
             if (*(char *)body_get_info(dropped) == 'b') {
               scene_add_score(s, 64);
