@@ -533,7 +533,7 @@ int main(int argc, char *argv[]) {
   char *font_path;
 
   if (argc == 1) {
-      font_path = "/Users/hannahchen/Shape_Bonanza/demo/FreeSans.ttf";
+      font_path = "resources/FreeSans.ttf";
   } else if (argc == 2) {
       font_path = argv[1];
   } else {

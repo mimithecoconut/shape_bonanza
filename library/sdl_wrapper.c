@@ -92,7 +92,7 @@ void init_SDL_audio(){
 void load_bmusic(){
   Mix_Music *gMusic = NULL;
   //Load music
-  gMusic = Mix_LoadMUS( "/home/cs3/cs3/shape_bonanza/tonghua.wav");
+  gMusic = Mix_LoadMUS("resources/tonghua.wav");
   if (gMusic == NULL){
      printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
   }
@@ -105,7 +105,7 @@ void load_bmusic(){
 
 void load_soundeffect(){
   Mix_Chunk *bloop = NULL;
-  bloop = Mix_LoadWAV("/home/cs3/cs3/shape_bonanza/bloop_x.wav");
+  bloop = Mix_LoadWAV("resources/bloop_x.wav");
   if (bloop == NULL){
      printf ("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
   }
@@ -286,7 +286,7 @@ double time_since_last_tick(void) {
 }
 
 void sdl_init_background(void) {
-    image = SDL_LoadBMP("background.bmp");
+    image = SDL_LoadBMP("resources/background.bmp");
     texture = SDL_CreateTextureFromSurface(renderer, image);
     vector_t window_center = get_window_center();
     vector_t max = vec_add(center, max_diff),
