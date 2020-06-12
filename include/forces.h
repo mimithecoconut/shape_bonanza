@@ -82,6 +82,8 @@ void collision_creator(void *aux);
 
 void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux);
 
+void collision_handler_3(body_t *body1, body_t *body2, vector_t axis, void *aux);
+
 /**
  * Adds a force creator to a scene that applies gravity between two bodies.
  * The force creator will be called each tick

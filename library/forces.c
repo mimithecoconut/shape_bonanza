@@ -66,6 +66,7 @@ void collision_creator(void *aux) {
     ((aux_t*) aux)->handler(((aux_t*) aux)->body1, ((aux_t*) aux)->body2, info.axis, ((aux_t*) aux)->aux);
     //essentially applies normal force by setting force back to 0,0
     body_set_force(((aux_t *) aux)->body1, VEC_ZERO);
+    body_set_velocity(((aux_t *) aux)->body1, VEC_ZERO);
   }
   ((aux_t *) aux)->collided = info.collided;
 }
@@ -89,6 +90,14 @@ void collision_handler_2(body_t *body1, body_t *body2, vector_t axis, void *aux)
   if (((aux_t *) aux)->collided == false) {
     body_add_impulse(body1, vec_impulse);
     body_add_impulse(body2, vec_multiply(-1, vec_impulse));
+  }
+  ((aux_t *) aux)->collided = !((aux_t *) aux)->collided;
+}
+
+void collision_handler_3(body_t *body1, body_t *body2, vector_t axis, void *aux){
+  if (((aux_t *) aux)->collided == false) {
+    body_set_force(body1, VEC_ZERO);
+    body_set_velocity(body1, VEC_ZERO);
   }
   ((aux_t *) aux)->collided = !((aux_t *) aux)->collided;
 }
@@ -169,5 +178,5 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
   aux->body1 = body1;
   aux->body2 = body2;
   aux->collided = false;
-  create_collision(scene, body1, body2, (collision_handler_t) collision_handler_2, aux, free);
+  create_collision(scene, body1, body2, (collision_handler_t) collision_handler_3, aux, free);
 }

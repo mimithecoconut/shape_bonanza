@@ -161,8 +161,8 @@ void load_soundeffect(){
   }
   Mix_PlayChannel(-1, bloop, 0);
 }
-//
-// void close_audio(Mix_Music *gMusic){
+
+// void close_audio(){
 //
 //    //Free the music
 //    Mix_FreeMusic( gMusic );
@@ -309,6 +309,8 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
+    Mix_Quit();
+    //close_audio();
     sdl_show();
 }
 
