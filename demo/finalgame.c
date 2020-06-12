@@ -320,11 +320,11 @@ int count_colors(body_t *b, scene_t *s, int count, list_t *l) {
         if (distance < 2.5 * SIZE_ALL && c1.r == c2.r && c1.g == c2.g && c1.b == c2.b) {
             if (!list_contains(l, body)) {
                 list_add(l, body);
-                return count_colors(body, s, list_size(l), l);
+                count_colors(body, s, list_size(l), l);
             }
         }
     }
-    return count;
+    return list_size(l);
 }
 
 /**
