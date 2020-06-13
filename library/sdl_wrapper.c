@@ -143,15 +143,6 @@ void load_soundeffect(){
   Mix_PlayChannel(-1, bloop, 0);
 }
 
-// void close_audio(){
-//
-//    //Free the music
-//    Mix_FreeMusic( gMusic );
-//    gMusic = NULL;
-//
-//    //Quit SDL subsystems
-//    Mix_Quit();
-// }
 
 void sdl_init(vector_t min, vector_t max) {
     // Check parameters
