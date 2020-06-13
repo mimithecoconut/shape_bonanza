@@ -465,7 +465,7 @@ void on_mouse(char button, mouse_event_type_t type, void *s){
 bool game_over(scene_t *scene){
   for (size_t i = 0; i < scene_bodies(scene); i++){
     body_t *body = scene_get_body(scene, i);
-    if (body_get_centroid(body).y > HEIGHT && *(char *)body_get_info(body) == 'p'){
+    if (body_get_centroid(body).y > HEIGHT - SIZE_ALL && *(char *)body_get_info(body) == 'p'){
       return true;
     }
   }
