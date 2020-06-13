@@ -123,7 +123,7 @@ void init_SDL_audio(){
 void load_bmusic(){
   Mix_Music *gMusic = NULL;
   //Load music
-  gMusic = Mix_LoadMUS("resources/tonghua.wav");
+  gMusic = Mix_LoadMUS("resources/pokecenter.wav");
   if (gMusic == NULL){
      printf ("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
   }
